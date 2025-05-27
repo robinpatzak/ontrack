@@ -9,6 +9,6 @@ const authRoutes = Router();
 
 authRoutes.post("/register", registerController);
 authRoutes.post("/login", loginController);
-authRoutes.post("/refresh", refreshController);
+authRoutes.get("/refresh", refreshController);
 
 export default authRoutes;
