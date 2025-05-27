@@ -7,6 +7,7 @@ import {
 import { loginUser, registerUser } from "../services/auth.service";
 import { z } from "zod";
 import ms, { StringValue } from "ms";
+import { generateTokenPair, verifyRefreshToken } from "../utils/jwt";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -25,6 +26,7 @@ export const registerController = async (req: Request, res: Response) => {
       success: true,
       message: "User registered successfully",
       user,
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     console.error("Error in registerController:", error);
@@ -68,6 +70,56 @@ export const loginController = async (req: Request, res: Response) => {
       });
   } catch (error) {
     console.error("Error in loginController:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const refreshController = async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      res.status(401).json({
+        success: false,
+        message: "Refresh token missing",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    let payload;
+    try {
+      payload = verifyRefreshToken(refreshToken);
+    } catch (error) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid or expired refresh token",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const { userId, email } = payload;
+    const { accessToken } = generateTokenPair({ userId, email });
+
+    res
+      .cookie("accessToken", accessToken, {
+        httpOnly: true,
+        secure: NODE_ENV !== "development",
+        sameSite: "strict",
+        maxAge: ms(JWT_ACCESS_EXPIRES_IN as StringValue),
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: "Access token refreshed successfully",
+        accessToken,
+      });
+  } catch (error) {
+    console.error("Error in refreshController:", error);
     res.status(500).json({
       success: false,
       message: "Internal server error",

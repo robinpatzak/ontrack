@@ -20,3 +20,10 @@ export const generateTokenPair = (
 
   return { accessToken, refreshToken };
 };
+
+export const verifyRefreshToken = (token: string) => {
+  return jwt.verify(token, JWT_REFRESH_SECRET) as {
+    userId: string;
+    email: string;
+  };
+};
