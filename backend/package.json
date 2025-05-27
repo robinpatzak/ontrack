@@ -1,0 +1,21 @@
+{
+  "name": "ontrack-backend",
+  "version": "0.0.0",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "nodemon --watch src --exec ts-node src/index.ts"
+  },
+  "keywords": [],
+  "author": "Robin Patzak",
+  "license": "MIT",
+  "description": "Backend API for the app OnTrack",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.2",
+    "nodemon": "^3.1.10",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
