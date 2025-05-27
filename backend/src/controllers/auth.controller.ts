@@ -1,12 +1,20 @@
 import { Request, Response } from "express";
 import { NODE_ENV } from "../config/env";
 import { loginUser, registerUser } from "../services/auth.service";
+import { z } from "zod";
+
+const registerSchema = z.object({
+  email: z.string().email(),
+  firstName: z.string(),
+  lastName: z.string(),
+  password: z.string().min(8),
+});
 
 export const registerController = async (req: Request, res: Response) => {
   try {
-    // TODO: Validate request body
+    const validatedBody = registerSchema.parse(req.body);
 
-    const { user } = await registerUser(req.body);
+    const { user } = await registerUser(validatedBody);
 
     res.status(201).json({
       success: true,
@@ -23,11 +31,16 @@ export const registerController = async (req: Request, res: Response) => {
   }
 };
 
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(8),
+});
+
 export const loginController = async (req: Request, res: Response) => {
   try {
-    //TODO: Validate request body
+    const validatedBody = loginSchema.parse(req.body);
 
-    const { user, accessToken, refreshToken } = await loginUser(req.body);
+    const { user, accessToken, refreshToken } = await loginUser(validatedBody);
 
     res
       .cookie("accessToken", accessToken, {
