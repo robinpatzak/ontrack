@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Created backend directory and folder structure
 - Add docker compose yaml with mongodb setup
 - Add auth routes
+- Create react frontend using vite
+- Add shadcn and react-router to the frontend
 
 ### Changed
 
