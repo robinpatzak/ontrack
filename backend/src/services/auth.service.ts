@@ -1,7 +1,7 @@
 import User from "../models/User";
 import { generateTokenPair } from "../utils/jwt";
 
-const registerService = async (registerData: {
+export const registerUser = async (registerData: {
   email: string;
   firstName: string;
   lastName: string;
@@ -21,7 +21,10 @@ const registerService = async (registerData: {
   };
 };
 
-const loginService = async (loginData: { email: string; password: string }) => {
+export const loginUser = async (loginData: {
+  email: string;
+  password: string;
+}) => {
   const { email, password } = loginData;
 
   const user = await User.findOne({ email });
@@ -44,9 +47,4 @@ const loginService = async (loginData: { email: string; password: string }) => {
     accessToken,
     refreshToken,
   };
-};
-
-export default {
-  registerService,
-  loginService,
 };

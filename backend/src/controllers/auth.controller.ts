@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
-import authService from "../services/auth.service";
 import { NODE_ENV } from "../config/env";
+import { loginUser, registerUser } from "../services/auth.service";
 
-const registerController = async (req: Request, res: Response) => {
+export const registerController = async (req: Request, res: Response) => {
   try {
     // TODO: Validate request body
 
-    const { user } = await authService.registerService(req.body);
+    const { user } = await registerUser(req.body);
 
     res.status(201).json({
       success: true,
@@ -23,13 +23,11 @@ const registerController = async (req: Request, res: Response) => {
   }
 };
 
-const loginController = async (req: Request, res: Response) => {
+export const loginController = async (req: Request, res: Response) => {
   try {
     //TODO: Validate request body
 
-    const { user, accessToken, refreshToken } = await authService.loginService(
-      req.body
-    );
+    const { user, accessToken, refreshToken } = await loginUser(req.body);
 
     res
       .cookie("accessToken", accessToken, {
@@ -59,5 +57,3 @@ const loginController = async (req: Request, res: Response) => {
     });
   }
 };
-
-export default { registerController, loginController };
