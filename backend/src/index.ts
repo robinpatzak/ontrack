@@ -5,11 +5,6 @@ import connectDatabase from "./config/database";
 import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
-import express from "express";
-import connectDatabase from "./config/database";
-import { API_VERSION, PORT } from "./config/env";
-import authRoutes from "./routes/auth.route";
-
 
 const app = express();
 
