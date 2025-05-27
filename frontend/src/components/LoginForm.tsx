@@ -31,7 +31,7 @@ export default function LoginForm({
     const response = await apiClient.post("/auth/login", formData);
     if (response.data.success) {
       checkAuth();
-      navigate("/");
+      navigate("/dashboard");
     }
   };
 

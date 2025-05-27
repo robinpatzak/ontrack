@@ -1,6 +1,5 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
-import { Button } from "@/components/ui/button";
-import apiClient from "@/lib/api";
+import DashboardRoute from "@/routes/Dashboard";
 import LoginRoute from "@/routes/Login";
 import RegisterRoute from "@/routes/Register";
 import { BrowserRouter, Route, Routes } from "react-router";
@@ -10,16 +9,10 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route
-          path="/"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Button
-                onClick={() => {
-                  apiClient.get("/auth/logout");
-                }}
-              >
-                Logout
-              </Button>
+              <DashboardRoute />
             </ProtectedRoute>
           }
         />
