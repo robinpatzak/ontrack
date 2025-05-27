@@ -1,0 +1,11 @@
+services:
+  ontrack-db:
+    image: mongo:latest
+    container_name: ontrack-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - ontrack-db-data:/data/db
+
+volumes:
+  ontrack-db-data:

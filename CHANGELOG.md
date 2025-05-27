@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Created repository
+- Created backend directory and folder structure
+- Add docker compose yaml with mongodb setup
+- Add auth routes
 
 ### Changed
 
