@@ -127,3 +127,32 @@ export const refreshController = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const logoutController = async (_: Request, res: Response) => {
+  try {
+    res
+      .clearCookie("accessToken", {
+        httpOnly: true,
+        secure: NODE_ENV !== "development",
+        sameSite: "strict",
+      })
+      .clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: NODE_ENV !== "devleopment",
+        sameSite: "strict",
+      })
+      .status(200)
+      .json({
+        success: true,
+        message: "Logged out successfully",
+        timestamp: new Date().toISOString(),
+      });
+  } catch (error) {
+    console.error("Error in logoutController:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
