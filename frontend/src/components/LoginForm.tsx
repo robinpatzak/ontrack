@@ -8,6 +8,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAuth } from "@/contexts/AuthContext";
 import apiClient from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -18,6 +19,7 @@ export default function LoginForm({
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const navigate = useNavigate();
+  const { checkAuth } = useAuth();
 
   const [formData, setFormData] = useState({
     email: "",
@@ -28,6 +30,7 @@ export default function LoginForm({
     e.preventDefault();
     const response = await apiClient.post("/auth/login", formData);
     if (response.data.success) {
+      checkAuth();
       navigate("/");
     }
   };
