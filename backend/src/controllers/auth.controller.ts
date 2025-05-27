@@ -1,7 +1,12 @@
 import { Request, Response } from "express";
-import { NODE_ENV } from "../config/env";
+import {
+  JWT_ACCESS_EXPIRES_IN,
+  JWT_REFRESH_EXPIRES_IN,
+  NODE_ENV,
+} from "../config/env";
 import { loginUser, registerUser } from "../services/auth.service";
 import { z } from "zod";
+import ms, { StringValue } from "ms";
 
 const registerSchema = z.object({
   email: z.string().email(),
@@ -47,13 +52,13 @@ export const loginController = async (req: Request, res: Response) => {
         httpOnly: true,
         secure: NODE_ENV !== "development",
         sameSite: "strict",
-        maxAge: 15 * 60 * 1000,
+        maxAge: ms(JWT_ACCESS_EXPIRES_IN as StringValue),
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: NODE_ENV !== "development",
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: ms(JWT_REFRESH_EXPIRES_IN as StringValue),
       })
       .status(200)
       .json({
