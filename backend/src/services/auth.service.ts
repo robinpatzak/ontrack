@@ -1,4 +1,5 @@
 import User from "../models/User";
+import { generateTokenPair } from "../utils/jwt";
 
 const registerService = async (registerData: {
   email: string;
@@ -33,8 +34,15 @@ const loginService = async (loginData: { email: string; password: string }) => {
     throw new Error("Invalid email or password");
   }
 
+  const { accessToken, refreshToken } = generateTokenPair({
+    userId: user._id,
+    email: user.email,
+  });
+
   return {
     user: user.omitPassword(),
+    accessToken,
+    refreshToken,
   };
 };
 

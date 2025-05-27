@@ -2,11 +2,13 @@ import express from "express";
 import { API_VERSION, PORT } from "./config/env";
 import { authRoutes } from "./routes";
 import connectDatabase from "./config/database";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 connectDatabase();
 
+app.use(cookieParser());
 app.use(express.json());
 
 const router = express.Router();
