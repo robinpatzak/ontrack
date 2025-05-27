@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add auth routes
 - Create react frontend using vite
 - Add shadcn and react-router to the frontend
+- Add Login and Register routes
 
 ### Changed
 
