@@ -1,13 +1,15 @@
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import express from "express";
 import connectDatabase from "./config/database";
-import { API_VERSION, PORT } from "./config/env";
+import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
 import authRoutes from "./routes/auth.route";
 
 const app = express();
 
 connectDatabase();
 
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 
@@ -17,6 +19,7 @@ router.get("/", (_, res) => {
   res.status(200).json({
     success: true,
     message: "API is running",
+    uptime: process.uptime(),
     timestamp: new Date().toISOString(),
   });
 });

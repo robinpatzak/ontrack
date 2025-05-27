@@ -8,14 +8,17 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import apiClient from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 
 export default function RegisterForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     firstName: "",
@@ -23,6 +26,14 @@ export default function RegisterForm({
     password: "",
     confirmPassword: "",
   });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const response = await apiClient.post("/auth/register", formData);
+    if (response.data.success) {
+      navigate("/login");
+    }
+  };
 
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -32,7 +43,7 @@ export default function RegisterForm({
           <CardDescription>Create your OnTrack account</CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="grid gap-6">
               <div className="grid gap-6">
                 <div className="grid gap-2">
@@ -106,7 +117,7 @@ export default function RegisterForm({
                   />
                 </div>
                 <Button type="submit" className="w-full">
-                  Login
+                  Register
                 </Button>
               </div>
               <div className="text-center text-sm">
