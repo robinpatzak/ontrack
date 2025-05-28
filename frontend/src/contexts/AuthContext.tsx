@@ -16,8 +16,8 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(true); // TODO: Default to true for testing purposes
-  const [loading, setLoading] = useState(false); // TODO: Default to false for testing purposes
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<{
     email: string;
     firstName: string;
@@ -25,19 +25,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   } | null>(null);
 
   const checkAuth = async () => {
-    // setLoading(true);
-    // try {
-    //   const response = await apiClient.get("/user/me");
-    //   console.log(response.data);
-    //   if (response.data.success) {
-    //     setUser(response.data.user);
-    //   }
-    //   setIsAuthenticated(true);
-    // } catch {
-    //   setIsAuthenticated(false);
-    // } finally {
-    //   setLoading(false);
-    // }
+    setLoading(true);
+    try {
+      const response = await apiClient.get("/user/me");
+      if (response.data.success) {
+        setUser(response.data.user);
+      }
+      setIsAuthenticated(true);
+    } catch {
+      setIsAuthenticated(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

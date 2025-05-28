@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added cors middleware to backend
 - Configured axios in frontend
 - Added correct auth communication between frontend and backend
+- Setup dashboard page with basic sidebar content
 
 ### Changed
 

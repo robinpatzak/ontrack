@@ -1,14 +1,16 @@
-import AppSidebar from "@/components/AppSidebar";
-import { Button } from "@/components/ui/button";
+import AppSidebar from "@/components/sidebar/AppSidebar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { useAuth } from "@/contexts/AuthContext";
-import apiClient from "@/lib/api";
-import { useNavigate } from "react-router";
 
 export default function DashboardRoute() {
   return (
@@ -22,12 +24,23 @@ export default function DashboardRoute() {
               orientation="vertical"
               className="mx-2 data-[orientation=vertical]:h-4"
             />
-            <h1 className="text-base font-medium">Dashboard</h1>
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="#">Project</BreadcrumbLink>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 px-2 py-4 md:gap-6 md:py-6">
-          This is my content
+        <div className="flex flex-1 flex-col gap-4 p-4 pt-2">
+          <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+            <div className="aspect-video rounded-xl bg-muted/50" />
+          </div>
+          <div className="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
         </div>
       </SidebarInset>
     </SidebarProvider>
