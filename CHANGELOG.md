@@ -19,6 +19,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured axios in frontend
 - Added correct auth communication between frontend and backend
 - Setup dashboard page with basic sidebar content
+- Added endpoint for creating and retrieving projects from users
+- Implemented endpoints in frontend
 
 ### Changed
 

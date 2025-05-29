@@ -5,6 +5,7 @@ import connectDatabase from "./config/database";
 import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
+import projectRoutes from "./routes/project.route";
 
 const app = express();
 
@@ -27,6 +28,7 @@ router.get("/", (_, res) => {
 
 router.use("/auth", authRoutes);
 router.use("/user", userRoutes);
+router.use("/project", projectRoutes);
 
 app.use("/api/v0", router);
 
