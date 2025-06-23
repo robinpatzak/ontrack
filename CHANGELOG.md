@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added functional breadcrumbs
 - Added default route that navigates to /dashboard
 - Added prototype timer component
+- Added modal when creating a project, which allows users to enter the details for their projects
 
 ### Changed
 
