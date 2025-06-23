@@ -16,6 +16,7 @@ import {
 import apiClient from "@/lib/api";
 import { ChevronRight, PlusCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Link } from "react-router";
 
 export default function ProjectSection() {
   const [projects, setProjects] = useState<
@@ -91,17 +92,24 @@ export default function ProjectSection() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <SidebarMenuSub>
-                    {["Timetracking", "Timetable", "Graph", "Settings"].map(
-                      (subItem) => (
-                        <SidebarMenuSubItem key={subItem}>
-                          <SidebarMenuSubButton asChild>
-                            <a href="#">
-                              <span>{subItem}</span>
-                            </a>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      )
-                    )}
+                    {[
+                      {
+                        title: "Timetracking",
+                        to: `/dashboard/project/${project._id}`,
+                      },
+                      // TODO: add these routes
+                      // { title: "Timetable", to: "#" },
+                      // { title: "Graph", to: "#" },
+                      // { title: "Settings", to: "#" },
+                    ].map((subItem) => (
+                      <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubButton asChild>
+                          <Link to={subItem.to}>
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
                   </SidebarMenuSub>
                 </CollapsibleContent>
               </SidebarMenuItem>

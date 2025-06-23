@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup dashboard page with basic sidebar content
 - Added endpoint for creating and retrieving projects from users
 - Implemented endpoints in frontend
+- Added routes and controller for projects in backend
+- Added the projects route to the frontend
+- Added refresh token logic to apiClient in frontend
+- Added functional breadcrumbs
+- Added default route that navigates to /dashboard
+- Added prototype timer component
 
 ### Changed
 

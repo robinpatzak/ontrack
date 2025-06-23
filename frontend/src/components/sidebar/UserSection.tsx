@@ -79,7 +79,7 @@ export default function UserSection() {
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled>
           <SettingsIcon />
-          Settings <small>In development</small>
+          Settings
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleLogout}>
           <LogOutIcon />

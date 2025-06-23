@@ -54,3 +54,33 @@ export const listProjectsController = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getProjectController = async (req: Request, res: Response) => {
+  try {
+    const owner = (req as any).user._id;
+    const { id } = req.params;
+
+    const project = await Project.findOne({ _id: id, owner });
+    if (!project) {
+      res.status(404).json({
+        success: false,
+        message: "Project not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Project retrieved successfully",
+      project,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve project",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
