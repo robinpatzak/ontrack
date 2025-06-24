@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useRef, useState } from "react";
 
 interface TimerProps {
@@ -11,36 +11,89 @@ export default function Timer({
   workingHoursPerDay,
   breakMinutesPerDay,
 }: TimerProps) {
-  const [time, setTime] = useState(0);
-  const [isRunning, setIsRunning] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [workTime, setWorkTime] = useState(0);
+  const [breakTime, setBreakTime] = useState(0);
+  const [isWorkRunning, setIsWorkRunning] = useState(false);
+  const [isBreakRunning, setIsBreakRunning] = useState(false);
 
-  const totalWorkTime = workingHoursPerDay * 3600;
+  const workIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const breakIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const startTimer = () => {
-    if (!isRunning) {
-      setIsRunning(true);
-      intervalRef.current = setInterval(() => {
-        setTime((prev) => prev + 1);
+  const totalWorkTimeGoal = workingHoursPerDay * 3600;
+  const totalBreakTimeGoal = breakMinutesPerDay * 60;
+
+  const toggleTimer = () => {
+    // TODO: save the timestamps in the database on each click to track work and break times accurately
+
+    if (isBreakRunning) {
+      setIsBreakRunning(false);
+      if (breakIntervalRef.current) {
+        clearInterval(breakIntervalRef.current);
+        breakIntervalRef.current = null;
+      }
+
+      setIsWorkRunning(true);
+      workIntervalRef.current = setInterval(() => {
+        setWorkTime((prev) => prev + 1);
+      }, 1000);
+    } else if (isWorkRunning) {
+      setIsWorkRunning(false);
+      if (workIntervalRef.current) {
+        clearInterval(workIntervalRef.current);
+        workIntervalRef.current = null;
+      }
+
+      setIsBreakRunning(true);
+      breakIntervalRef.current = setInterval(() => {
+        setBreakTime((prev) => prev + 1);
+      }, 1000);
+    } else {
+      setIsWorkRunning(true);
+      workIntervalRef.current = setInterval(() => {
+        setWorkTime((prev) => prev + 1);
       }, 1000);
     }
   };
 
-  const stopTimer = () => {
-    if (isRunning) {
-      setIsRunning(false);
-      setTime(0);
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
+  const resetTimers = () => {
+    setWorkTime(0);
+    setBreakTime(0);
+    setIsWorkRunning(false);
+    setIsBreakRunning(false);
+
+    if (workIntervalRef.current) {
+      clearInterval(workIntervalRef.current);
+      workIntervalRef.current = null;
     }
+    if (breakIntervalRef.current) {
+      clearInterval(breakIntervalRef.current);
+      breakIntervalRef.current = null;
+    }
+  };
+
+  const endTimer = () => {
+    setIsWorkRunning(false);
+    setIsBreakRunning(false);
+
+    if (workIntervalRef.current) {
+      clearInterval(workIntervalRef.current);
+      workIntervalRef.current = null;
+    }
+    if (breakIntervalRef.current) {
+      clearInterval(breakIntervalRef.current);
+      breakIntervalRef.current = null;
+    }
+
+    // TODO: save the times in the database
   };
 
   useEffect(() => {
     return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      if (workIntervalRef.current) {
+        clearInterval(workIntervalRef.current);
+      }
+      if (breakIntervalRef.current) {
+        clearInterval(breakIntervalRef.current);
       }
     };
   }, []);
@@ -52,24 +105,84 @@ export default function Timer({
     return `${h}:${m}:${s}`;
   };
 
-  const remainingTime = Math.max(totalWorkTime - time, 0);
+  const formatGoalTime = (seconds: number) => {
+    if (seconds >= 3600) {
+      return `${Math.floor(seconds / 3600)}h`;
+    } else {
+      return `${Math.floor(seconds / 60)}min`;
+    }
+  };
+
+  const getButtonText = () => {
+    if (isBreakRunning) return "Resume Work";
+    if (isWorkRunning) return "Take Break";
+    return "Start Work";
+  };
+
+  const workRemainingTime = Math.max(totalWorkTimeGoal - workTime, 0);
+  const breakRemainingTime = Math.max(totalBreakTimeGoal - breakTime, 0);
 
   return (
-    <Card>
-      <CardContent>
-        {/* TODO: replace with mono typography component */}
-        <p className="font-mono font-bold text-6xl">{formatTime(time)}</p>
-        <p className="font-mono text-sm text-center">
-          {formatTime(remainingTime)}
-        </p>
-        <div className="flex justify-center">
-          {!isRunning ? (
-            <Button onClick={startTimer}>Start Timer</Button>
-          ) : (
-            <Button onClick={stopTimer}>Stop Timer</Button>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="space-y-4 w-full max-w-4xl mx-auto">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Card
+          className={`border-2 ${
+            isWorkRunning ? "border-green-500 bg-green-50" : ""
+          }`}
+        >
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-xl">Work Time</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Goal: {formatGoalTime(totalWorkTimeGoal)}
+            </p>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <div className="font-mono font-bold text-4xl md:text-6xl">
+              {formatTime(workTime)}
+            </div>
+            <div className="font-mono text-sm text-muted-foreground">
+              Remaining: {formatTime(workRemainingTime)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card
+          className={`border-2 ${
+            isBreakRunning ? "border-blue-500 bg-blue-50" : ""
+          }`}
+        >
+          <CardHeader className="text-center pb-2">
+            <CardTitle className="text-xl">Break Time</CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Goal: {formatGoalTime(totalBreakTimeGoal)}
+            </p>
+          </CardHeader>
+          <CardContent className="text-center space-y-4">
+            <div className="font-mono font-bold text-4xl md:text-6xl">
+              {formatTime(breakTime)}
+            </div>
+            <div className="font-mono text-sm text-muted-foreground">
+              Remaining: {formatTime(breakRemainingTime)}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="text-center space-y-2">
+        <Button onClick={toggleTimer} size="lg" className="w-full">
+          {getButtonText()}
+        </Button>
+        <Button
+          className="w-full"
+          onClick={endTimer}
+          disabled={!isWorkRunning && !isBreakRunning}
+        >
+          Finish Work
+        </Button>
+        <Button className="w-full" onClick={resetTimers} variant="destructive">
+          Reset Timers
+        </Button>
+      </div>
+    </div>
   );
 }
