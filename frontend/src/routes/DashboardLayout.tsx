@@ -76,7 +76,7 @@ export default function DashboardLayout() {
       let displayName = segment.charAt(0).toUpperCase() + segment.slice(1);
 
       if (isId) {
-        const isProjectId = index > 0 && pathSegments[index - 1] === "project";
+        const isProjectId = index > 0;
 
         if (isProjectId) {
           if (projectNames[segment]) {

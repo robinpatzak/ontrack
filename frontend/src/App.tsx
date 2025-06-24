@@ -4,6 +4,7 @@ import DashboardLayout from "@/routes/DashboardLayout";
 import LoginRoute from "@/routes/Login";
 import ProjectRoute from "@/routes/Project";
 import RegisterRoute from "@/routes/Register";
+import TimeTrackingRoute from "@/routes/TimetrackingRoute";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 function App() {
@@ -19,7 +20,8 @@ function App() {
           }
         >
           <Route index element={<DashboardRoute />} />
-          <Route path="project/:id" element={<ProjectRoute />} />
+          <Route path=":id" element={<ProjectRoute />} />
+          <Route path=":id/timetracking" element={<TimeTrackingRoute />} />
         </Route>
         <Route path="/login" element={<LoginRoute />} />
         <Route path="/register" element={<RegisterRoute />} />

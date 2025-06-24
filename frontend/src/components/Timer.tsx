@@ -57,8 +57,11 @@ export default function Timer({
   return (
     <Card>
       <CardContent>
+        {/* TODO: replace with mono typography component */}
         <p className="font-mono font-bold text-6xl">{formatTime(time)}</p>
-        <p className="font-mono text-sm text-center">{formatTime(remainingTime)}</p>
+        <p className="font-mono text-sm text-center">
+          {formatTime(remainingTime)}
+        </p>
         <div className="flex justify-center">
           {!isRunning ? (
             <Button onClick={startTimer}>Start Timer</Button>

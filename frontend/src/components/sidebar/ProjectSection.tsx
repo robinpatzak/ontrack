@@ -1,37 +1,24 @@
-import { Button } from "@/components/ui/button";
+import CreateProjectDialog from "@/components/sidebar/CreateProjectDialog";
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Textarea } from "@/components/ui/textarea";
 import apiClient from "@/lib/api";
-import { ChevronRight, PlusCircleIcon } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useLocation } from "react-router";
 
-interface Project {
+export interface Project {
   _id: string;
   title: string;
   description: string;
@@ -40,59 +27,13 @@ interface Project {
   hourlyRate: number;
 }
 
-interface ProjectFormData {
-  title: string;
-  description: string;
-  workingHoursPerDay: number;
-  breakMinutesPerDay: number;
-  hourlyRate: number;
-}
-
 export default function ProjectSection() {
+  const location = useLocation();
+
   const [projects, setProjects] = useState<Project[]>([]);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<ProjectFormData>({
-    title: "",
-    description: "",
-    workingHoursPerDay: 8,
-    breakMinutesPerDay: 60,
-    hourlyRate: 20,
-  });
 
-  const handleResetForm = () => {
-    setFormData({
-      title: "",
-      description: "",
-      workingHoursPerDay: 8,
-      breakMinutesPerDay: 60,
-      hourlyRate: 20,
-    });
-  };
-
-  const handleInputChange = (
-    field: keyof ProjectFormData,
-    value: string | number
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCreateProject = async () => {
-    if (!formData.title.trim()) return;
-
-    setIsCreating(true);
-
-    try {
-      const result = await apiClient.post("/project", formData);
-      setProjects((prev) => [...prev, result.data.project]);
-      setIsDialogOpen(false);
-      handleResetForm();
-    } catch (error) {
-      console.error("Failed to create project:", error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
+  const currentProjectId =
+    location.pathname.match(/\/([a-f0-9]{24})/)?.[1] || null;
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -115,137 +56,34 @@ export default function ProjectSection() {
       <SidebarGroupContent className="flex flex-col gap-2">
         <SidebarMenu>
           <SidebarMenuItem className="flex items-center gap-2">
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <SidebarMenuButton tooltip="Create a project">
-                  <PlusCircleIcon />
-                  <span>Create Project</span>
-                </SidebarMenuButton>
-              </DialogTrigger>
-              <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                  <DialogTitle>Create New Project</DialogTitle>
-                  <DialogDescription>
-                    Enter details for your new project.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="title">Title</Label>
-                    <Input
-                      id="title"
-                      value={formData.title}
-                      onChange={(e) =>
-                        handleInputChange("title", e.target.value)
-                      }
-                      placeholder="Project Title"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="description">Description</Label>
-                    <Textarea
-                      id="description"
-                      rows={2}
-                      value={formData.description}
-                      onChange={(e) =>
-                        handleInputChange("description", e.target.value)
-                      }
-                      placeholder="Project Description"
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="workingHoursPerDay">
-                      Working Hours per Day
-                    </Label>
-                    <Input
-                      id="workingHoursPerDay"
-                      type="number"
-                      min={1}
-                      max={24}
-                      value={formData.workingHoursPerDay}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "workingHoursPerDay",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="breakMinutesPerDay">
-                      Break Minutes per Day
-                    </Label>
-                    <Input
-                      id="breakMinutesPerDay"
-                      type="number"
-                      min={0}
-                      value={formData.breakMinutesPerDay}
-                      onChange={(e) =>
-                        handleInputChange(
-                          "breakMinutesPerDay",
-                          Number(e.target.value)
-                        )
-                      }
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="hourlyRate">Hourly Rate</Label>
-                    <Input
-                      id="hourlyRate"
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      value={formData.hourlyRate}
-                      onChange={(e) =>
-                        handleInputChange("hourlyRate", Number(e.target.value))
-                      }
-                      placeholder="0.00"
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setIsDialogOpen(false);
-                      handleResetForm();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    type="submit"
-                    onClick={handleCreateProject}
-                    disabled={isCreating || !formData.title.trim()}
-                  >
-                    {isCreating ? "Creating ..." : "Create"}
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
+            <CreateProjectDialog setProjects={setProjects} />
           </SidebarMenuItem>
         </SidebarMenu>
-        <SidebarMenu>
-          {projects.map((project) => (
-            <Collapsible
-              key={project._id}
-              asChild
-              defaultOpen={false}
-              className="group/collapsible"
-            >
-              <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={project.title}>
+
+        {projects.length > 0 && (
+          <Accordion
+            type="single"
+            collapsible
+            className="w-full"
+            value={currentProjectId || ""}
+          >
+            {projects.map((project) => (
+              <AccordionItem key={project._id} value={project._id}>
+                <AccordionTrigger className="flex items-center justify-between px-2 py-2 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground rounded-md">
+                  <Link
+                    to={`/dashboard/${project._id}`}
+                    className="flex-1 text-left"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <span>{project.title}</span>
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
-                <CollapsibleContent>
+                  </Link>
+                </AccordionTrigger>
+                <AccordionContent className="pb-0">
                   <SidebarMenuSub>
                     {[
                       {
                         title: "Timetracking",
-                        to: `/dashboard/project/${project._id}`,
+                        to: `/dashboard/${project._id}/timetracking`,
                       },
                       // TODO: add these routes
                       // { title: "Timetable", to: "#" },
@@ -261,11 +99,11 @@ export default function ProjectSection() {
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>
-                </CollapsibleContent>
-              </SidebarMenuItem>
-            </Collapsible>
-          ))}
-        </SidebarMenu>
+                </AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        )}
       </SidebarGroupContent>
     </>
   );
