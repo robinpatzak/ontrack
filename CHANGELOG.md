@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Removed
 
 ### Fixed
+- Fixed being able to open other accordions in the sidebar than the one from the current location
 
 ### Security
 

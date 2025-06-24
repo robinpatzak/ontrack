@@ -29,11 +29,13 @@ export interface Project {
 
 export default function ProjectSection() {
   const location = useLocation();
-
-  const [projects, setProjects] = useState<Project[]>([]);
-
   const currentProjectId =
     location.pathname.match(/\/([a-f0-9]{24})/)?.[1] || null;
+
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [openProjectId, setOpenProjectId] = useState<string | null>(
+    currentProjectId
+  );
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -50,6 +52,10 @@ export default function ProjectSection() {
     fetchProjects();
   }, []);
 
+  useEffect(() => {
+    setOpenProjectId(currentProjectId);
+  }, [currentProjectId]);
+
   return (
     <>
       <SidebarGroupLabel>Projects</SidebarGroupLabel>
@@ -65,7 +71,8 @@ export default function ProjectSection() {
             type="single"
             collapsible
             className="w-full"
-            value={currentProjectId || ""}
+            value={openProjectId || ""}
+            onValueChange={(value) => setOpenProjectId(value)}
           >
             {projects.map((project) => (
               <AccordionItem key={project._id} value={project._id}>
