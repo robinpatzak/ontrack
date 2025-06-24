@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added prototype timer component
 - Added modal when creating a project, which allows users to enter the details for their projects
 - Added reusable typography components
+- Added timeEntry routes to backend allowing to start, stop and retrieve working times
 
 ### Changed
 

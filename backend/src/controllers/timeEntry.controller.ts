@@ -1,0 +1,363 @@
+import { Request, Response } from "express";
+import Project from "../models/Project";
+import TimeEntry from "../models/TimeEntry";
+
+export const getTodayTimeEntry = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const project = await Project.findOne({ _id: projectId, owner: user._id });
+    if (!project) {
+      res.status(404).json({
+        success: false,
+        message: "Project not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    let timeEntry = await TimeEntry.findOne({
+      user: user._id,
+      project: projectId,
+      date: today,
+    });
+
+    if (!timeEntry) {
+      timeEntry = new TimeEntry({
+        user: user._id,
+        project: projectId,
+        date: today,
+        totalWorkTime: 0,
+        totalBreakTime: 0,
+        isWorkActive: false,
+        isBreakActive: false,
+        workSessions: [],
+        breakSessions: [],
+      });
+      await timeEntry.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Time entry retrieved successfully",
+      timeEntry: {
+        ...timeEntry.toObject(),
+        currentWorkTime: timeEntry.getCurrentWorkTime(),
+        currentBreakTime: timeEntry.getCurrentBreakTime(),
+      },
+      project,
+    });
+  } catch (error) {
+    console.error("Error in getTodayTimeEntry:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const startWork = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const timeEntry = await TimeEntry.findOne({
+      user: user._id,
+      project: projectId,
+      date: today,
+    });
+
+    if (!timeEntry) {
+      res.status(404).json({
+        success: false,
+        message: "Time entry not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    if (timeEntry.isBreakActive && timeEntry.breakStartedAt) {
+      const breakDuration = Math.floor(
+        (Date.now() - timeEntry.breakStartedAt.getTime()) / 1000
+      );
+      timeEntry.totalBreakTime += breakDuration;
+
+      const lastBreakSession =
+        timeEntry.breakSessions[timeEntry.breakSessions.length - 1];
+      if (lastBreakSession && !lastBreakSession.endTime) {
+        lastBreakSession.endTime = new Date();
+        lastBreakSession.duration = breakDuration;
+      }
+    }
+
+    timeEntry.isWorkActive = true;
+    timeEntry.isBreakActive = false;
+    timeEntry.workStartedAt = new Date();
+    timeEntry.breakStartedAt = undefined;
+
+    timeEntry.workSessions.push({
+      startTime: new Date(),
+    });
+
+    await timeEntry.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Work timer started",
+      timeEntry: {
+        ...timeEntry.toObject(),
+        currentWorkTime: timeEntry.getCurrentWorkTime(),
+        currentBreakTime: timeEntry.getCurrentBreakTime(),
+      },
+    });
+  } catch (error) {
+    console.error("Error in startWork:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const startBreak = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const timeEntry = await TimeEntry.findOne({
+      user: user._id,
+      project: projectId,
+      date: today,
+    });
+
+    if (!timeEntry) {
+      res.status(404).json({
+        success: false,
+        message: "Time entry not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    if (timeEntry.isWorkActive && timeEntry.workStartedAt) {
+      const workDuration = Math.floor(
+        (Date.now() - timeEntry.workStartedAt.getTime()) / 1000
+      );
+      timeEntry.totalWorkTime += workDuration;
+
+      const lastWorkSession =
+        timeEntry.workSessions[timeEntry.workSessions.length - 1];
+      if (lastWorkSession && !lastWorkSession.endTime) {
+        lastWorkSession.endTime = new Date();
+        lastWorkSession.duration = workDuration;
+      }
+    }
+
+    timeEntry.isBreakActive = true;
+    timeEntry.isWorkActive = false;
+    timeEntry.breakStartedAt = new Date();
+    timeEntry.workStartedAt = undefined;
+
+    timeEntry.breakSessions.push({
+      startTime: new Date(),
+    });
+
+    await timeEntry.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Break timer started",
+      timeEntry: {
+        ...timeEntry.toObject(),
+        currentWorkTime: timeEntry.getCurrentWorkTime(),
+        currentBreakTime: timeEntry.getCurrentBreakTime(),
+      },
+    });
+  } catch (error) {
+    console.error("Error in startBreak:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const stopTimers = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const timeEntry = await TimeEntry.findOne({
+      user: user._id,
+      project: projectId,
+      date: today,
+    });
+
+    if (!timeEntry) {
+      res.status(404).json({
+        success: false,
+        message: "Time entry not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    if (timeEntry.isWorkActive && timeEntry.workStartedAt) {
+      const workDuration = Math.floor(
+        (Date.now() - timeEntry.workStartedAt.getTime()) / 1000
+      );
+      timeEntry.totalWorkTime += workDuration;
+
+      const lastWorkSession =
+        timeEntry.workSessions[timeEntry.workSessions.length - 1];
+      if (lastWorkSession && !lastWorkSession.endTime) {
+        lastWorkSession.endTime = new Date();
+        lastWorkSession.duration = workDuration;
+      }
+    }
+
+    if (timeEntry.isBreakActive && timeEntry.breakStartedAt) {
+      const breakDuration = Math.floor(
+        (Date.now() - timeEntry.breakStartedAt.getTime()) / 1000
+      );
+      timeEntry.totalBreakTime += breakDuration;
+
+      const lastBreakSession =
+        timeEntry.breakSessions[timeEntry.breakSessions.length - 1];
+      if (lastBreakSession && !lastBreakSession.endTime) {
+        lastBreakSession.endTime = new Date();
+        lastBreakSession.duration = breakDuration;
+      }
+    }
+
+    timeEntry.isWorkActive = false;
+    timeEntry.isBreakActive = false;
+    timeEntry.workStartedAt = undefined;
+    timeEntry.breakStartedAt = undefined;
+
+    await timeEntry.save();
+
+    res.status(200).json({
+      success: true,
+      message: "All timers stopped",
+      timeEntry: {
+        ...timeEntry.toObject(),
+        currentWorkTime: timeEntry.getCurrentWorkTime(),
+        currentBreakTime: timeEntry.getCurrentBreakTime(),
+      },
+    });
+  } catch (error) {
+    console.error("Error in stopTimers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const getTimeEntries = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const { startDate, endDate } = req.query;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const query: any = {
+      user: user._id,
+      project: projectId,
+    };
+
+    if (startDate || endDate) {
+      query.date = {};
+      if (startDate) query.date.$gte = new Date(startDate as string);
+      if (endDate) query.date.$lte = new Date(endDate as string);
+    }
+
+    const timeEntries = await TimeEntry.find(query)
+      .populate(
+        "project",
+        "title workingHoursPerDay breakMinutesPerDay hourlyRate"
+      )
+      .sort({ date: -1 });
+
+    const entriesWithCurrentTimes = timeEntries.map((entry) => ({
+      ...entry.toObject(),
+      currentWorkTime: entry.getCurrentWorkTime(),
+      currentBreakTime: entry.getCurrentBreakTime(),
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: "Time entries retrieved successfully",
+      timeEntries: entriesWithCurrentTimes,
+    });
+  } catch (error) {
+    console.error("Error in getTimeEntries:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};

@@ -6,6 +6,7 @@ import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
 import authRoutes from "./routes/auth.route";
 import userRoutes from "./routes/user.route";
 import projectRoutes from "./routes/project.route";
+import timeEntryRoutes from "./routes/timeEntry.route";
 
 const app = express();
 
@@ -29,6 +30,7 @@ router.get("/", (_, res) => {
 router.use("/auth", authRoutes);
 router.use("/user", userRoutes);
 router.use("/project", projectRoutes);
+router.use("/time-entries", timeEntryRoutes);
 
 app.use("/api/v0", router);
 
