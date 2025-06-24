@@ -1,12 +1,13 @@
 import { Router } from "express";
-import { requireAuthentication } from "../middleware/authentication";
 import {
   getTimeEntries,
   getTodayTimeEntry,
+  resetTimers,
   startBreak,
   startWork,
   stopTimers,
 } from "../controllers/timeEntry.controller";
+import { requireAuthentication } from "../middleware/authentication";
 
 const timeEntryRoutes = Router();
 
@@ -29,6 +30,11 @@ timeEntryRoutes.post(
   "/:projectId/stop-timers",
   requireAuthentication,
   stopTimers
+);
+timeEntryRoutes.post(
+  "/:projectId/reset-timers",
+  requireAuthentication,
+  resetTimers
 );
 timeEntryRoutes.get("/:projectId", requireAuthentication, getTimeEntries);
 

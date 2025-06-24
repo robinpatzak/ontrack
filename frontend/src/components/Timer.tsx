@@ -1,102 +1,240 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useEffect, useRef, useState } from "react";
+import apiClient from "@/lib/api";
+import { Trash } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TimerProps {
   workingHoursPerDay: number;
   breakMinutesPerDay: number;
+  projectId: string;
+}
+
+interface TimeEntry {
+  _id: string;
+  totalWorkTime: number;
+  totalBreakTime: number;
+  currentWorkTime: number;
+  currentBreakTime: number;
+  isWorkActive: boolean;
+  isBreakActive: boolean;
+  workStartedAt?: string;
+  breakStartedAt?: string;
 }
 
 export default function Timer({
   workingHoursPerDay,
   breakMinutesPerDay,
+  projectId,
 }: TimerProps) {
   const [workTime, setWorkTime] = useState(0);
   const [breakTime, setBreakTime] = useState(0);
   const [isWorkRunning, setIsWorkRunning] = useState(false);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const workIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const breakIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSyncRef = useRef<number>(Date.now());
 
   const totalWorkTimeGoal = workingHoursPerDay * 3600;
   const totalBreakTimeGoal = breakMinutesPerDay * 60;
 
-  const toggleTimer = () => {
-    // TODO: save the timestamps in the database on each click to track work and break times accurately
+  const fetchTimeEntry = useCallback(async () => {
+    try {
+      const response = await apiClient.get(`/time-entries/${projectId}/today`);
+      const data = response.data;
 
+      if (data.success) {
+        const timeEntry: TimeEntry = data.timeEntry;
+        setWorkTime(timeEntry.currentWorkTime);
+        setBreakTime(timeEntry.currentBreakTime);
+        setIsWorkRunning(timeEntry.isWorkActive);
+        setIsBreakRunning(timeEntry.isBreakActive);
+
+        if (timeEntry.isWorkActive) {
+          startLocalWorkTimer();
+        } else if (timeEntry.isBreakActive) {
+          startLocalBreakTimer();
+        }
+
+        lastSyncRef.current = Date.now();
+      } else {
+        setError(data.message || "Failed to fetch time entry");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to fetch time entry"
+      );
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId]);
+
+  const startLocalWorkTimer = () => {
+    if (workIntervalRef.current) {
+      clearInterval(workIntervalRef.current);
+    }
+    workIntervalRef.current = setInterval(() => {
+      setWorkTime((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const startLocalBreakTimer = () => {
+    if (breakIntervalRef.current) {
+      clearInterval(breakIntervalRef.current);
+    }
+    breakIntervalRef.current = setInterval(() => {
+      setBreakTime((prev) => prev + 1);
+    }, 1000);
+  };
+
+  const clearAllTimers = () => {
+    if (workIntervalRef.current) {
+      clearInterval(workIntervalRef.current);
+      workIntervalRef.current = null;
+    }
+    if (breakIntervalRef.current) {
+      clearInterval(breakIntervalRef.current);
+      breakIntervalRef.current = null;
+    }
+  };
+
+  const startWork = async () => {
+    try {
+      const response = await apiClient.post(
+        `/time-entries/${projectId}/start-work`
+      );
+      const data = response.data;
+
+      if (data.success) {
+        const timeEntry: TimeEntry = data.timeEntry;
+        setWorkTime(timeEntry.currentWorkTime);
+        setBreakTime(timeEntry.currentBreakTime);
+        setIsWorkRunning(true);
+        setIsBreakRunning(false);
+
+        clearAllTimers();
+        startLocalWorkTimer();
+        lastSyncRef.current = Date.now();
+      } else {
+        setError(data.message || "Failed to start work timer");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to start work timer"
+      );
+    }
+  };
+
+  const startBreak = async () => {
+    try {
+      const response = await apiClient.post(
+        `/time-entries/${projectId}/start-break`
+      );
+      const data = response.data;
+
+      if (data.success) {
+        const timeEntry: TimeEntry = data.timeEntry;
+        setWorkTime(timeEntry.currentWorkTime);
+        setBreakTime(timeEntry.currentBreakTime);
+        setIsWorkRunning(false);
+        setIsBreakRunning(true);
+
+        clearAllTimers();
+        startLocalBreakTimer();
+        lastSyncRef.current = Date.now();
+      } else {
+        setError(data.message || "Failed to start break timer");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to start break timer"
+      );
+    }
+  };
+
+  const toggleTimer = async () => {
     if (isBreakRunning) {
-      setIsBreakRunning(false);
-      if (breakIntervalRef.current) {
-        clearInterval(breakIntervalRef.current);
-        breakIntervalRef.current = null;
-      }
-
-      setIsWorkRunning(true);
-      workIntervalRef.current = setInterval(() => {
-        setWorkTime((prev) => prev + 1);
-      }, 1000);
+      await startWork();
     } else if (isWorkRunning) {
-      setIsWorkRunning(false);
-      if (workIntervalRef.current) {
-        clearInterval(workIntervalRef.current);
-        workIntervalRef.current = null;
-      }
-
-      setIsBreakRunning(true);
-      breakIntervalRef.current = setInterval(() => {
-        setBreakTime((prev) => prev + 1);
-      }, 1000);
+      await startBreak();
     } else {
-      setIsWorkRunning(true);
-      workIntervalRef.current = setInterval(() => {
-        setWorkTime((prev) => prev + 1);
-      }, 1000);
+      await startWork();
     }
   };
 
-  const resetTimers = () => {
-    setWorkTime(0);
-    setBreakTime(0);
-    setIsWorkRunning(false);
-    setIsBreakRunning(false);
+  const stopTimers = async () => {
+    try {
+      const response = await apiClient.post(
+        `/time-entries/${projectId}/stop-timers`
+      );
+      const data = response.data;
 
-    if (workIntervalRef.current) {
-      clearInterval(workIntervalRef.current);
-      workIntervalRef.current = null;
-    }
-    if (breakIntervalRef.current) {
-      clearInterval(breakIntervalRef.current);
-      breakIntervalRef.current = null;
+      if (data.success) {
+        const timeEntry: TimeEntry = data.timeEntry;
+        setWorkTime(timeEntry.currentWorkTime);
+        setBreakTime(timeEntry.currentBreakTime);
+        setIsWorkRunning(false);
+        setIsBreakRunning(false);
+
+        clearAllTimers();
+        lastSyncRef.current = Date.now();
+      } else {
+        setError(data.message || "Failed to stop timers");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to stop timers"
+      );
     }
   };
 
-  const endTimer = () => {
-    setIsWorkRunning(false);
-    setIsBreakRunning(false);
+  const resetTimers = async () => {
+    try {
+      const response = await apiClient.post(
+        `/time-entries/${projectId}/reset-timers`
+      );
+      const data = response.data;
 
-    if (workIntervalRef.current) {
-      clearInterval(workIntervalRef.current);
-      workIntervalRef.current = null;
-    }
-    if (breakIntervalRef.current) {
-      clearInterval(breakIntervalRef.current);
-      breakIntervalRef.current = null;
-    }
+      if (data.success) {
+        setWorkTime(0);
+        setBreakTime(0);
+        setIsWorkRunning(false);
+        setIsBreakRunning(false);
 
-    // TODO: save the times in the database
+        clearAllTimers();
+        lastSyncRef.current = Date.now();
+      } else {
+        setError(data.message || "Failed to reset today's entry");
+      }
+    } catch (error) {
+      setError(
+        error instanceof Error ? error.message : "Failed to reset today's entry"
+      );
+    }
   };
 
   useEffect(() => {
+    const syncInterval = setInterval(() => {
+      if (
+        (isWorkRunning || isBreakRunning) &&
+        document.visibilityState === "visible"
+      ) {
+        fetchTimeEntry();
+      }
+    }, 30000);
+
+    return () => clearInterval(syncInterval);
+  }, [isWorkRunning, isBreakRunning, fetchTimeEntry]);
+
+  useEffect(() => {
+    fetchTimeEntry();
     return () => {
-      if (workIntervalRef.current) {
-        clearInterval(workIntervalRef.current);
-      }
-      if (breakIntervalRef.current) {
-        clearInterval(breakIntervalRef.current);
-      }
+      clearAllTimers();
     };
-  }, []);
+  }, [fetchTimeEntry, projectId]);
 
   const formatTime = (seconds: number) => {
     const h = String(Math.floor(seconds / 3600)).padStart(2, "0");
@@ -121,6 +259,26 @@ export default function Timer({
 
   const workRemainingTime = Math.max(totalWorkTimeGoal - workTime, 0);
   const breakRemainingTime = Math.max(totalBreakTimeGoal - breakTime, 0);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg">Loading timer...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center text-red-500 p-4">
+        <div className="text-lg font-semibold">Error</div>
+        <div className="text-sm">{error}</div>
+        <Button onClick={fetchTimeEntry} className="mt-2" variant="outline">
+          Retry
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4 w-full max-w-4xl mx-auto">
@@ -174,15 +332,15 @@ export default function Timer({
         </Button>
         <Button
           className="w-full"
-          onClick={endTimer}
+          onClick={stopTimers}
           disabled={!isWorkRunning && !isBreakRunning}
         >
           Finish Work
         </Button>
-        <Button className="w-full" onClick={resetTimers} variant="destructive">
-          Reset Timers
-        </Button>
       </div>
+      <Button onClick={resetTimers} variant="destructive">
+        <Trash /> Delete todays entry
+      </Button>
     </div>
   );
 }

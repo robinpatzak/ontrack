@@ -48,6 +48,7 @@ export default function TimeTrackingRoute() {
         <Timer
           workingHoursPerDay={project.workingHoursPerDay}
           breakMinutesPerDay={project.breakMinutesPerDay}
+          projectId={id || ""}
         />
       </div>
     </div>

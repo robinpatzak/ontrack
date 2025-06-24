@@ -361,3 +361,66 @@ export const getTimeEntries = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const resetTimers = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const timeEntry = await TimeEntry.findOne({
+      user: user._id,
+      project: projectId,
+      date: today,
+    });
+
+    if (!timeEntry) {
+      res.status(404).json({
+        success: false,
+        message: "Time entry not found",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    // Reset all values
+    timeEntry.totalWorkTime = 0;
+    timeEntry.totalBreakTime = 0;
+    timeEntry.isWorkActive = false;
+    timeEntry.isBreakActive = false;
+    timeEntry.workStartedAt = undefined;
+    timeEntry.breakStartedAt = undefined;
+    timeEntry.workSessions = [];
+    timeEntry.breakSessions = [];
+
+    await timeEntry.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Timers reset successfully",
+      timeEntry: {
+        ...timeEntry.toObject(),
+        currentWorkTime: 0,
+        currentBreakTime: 0,
+      },
+    });
+  } catch (error) {
+    console.error("Error in resetTimers:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
+      timestamp: new Date().toISOString(),
+    });
+  }
+};
