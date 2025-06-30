@@ -28,7 +28,7 @@ const formatDateToIsoLocal = (date: Date) => {
 };
 
 interface CreateTimeEntryDialogProps {
-  onEntryCreated: React.Dispatch<React.SetStateAction<TimeRecord[] | null>>;
+  onEntryCreated: React.Dispatch<React.SetStateAction<TimeRecord[]>>;
 }
 
 export default function CreateTimeEntryDialog({
