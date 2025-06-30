@@ -1,3 +1,4 @@
+import CreateTimeEntryDialog from "@/components/CreateTimeEntryDialog";
 import {
   Table,
   TableBody,
@@ -11,7 +12,7 @@ import apiClient from "@/lib/api";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 
-type TimeRecord = {
+export type TimeRecord = {
   date: string;
   startTime?: string;
   endTime?: string;
@@ -51,31 +52,6 @@ export default function TimeRecordsRoute() {
   const { id } = useParams<{ id: string }>();
 
   const [timeEntries, setTimeEntries] = useState<TimeRecord[] | null>(null);
-  const [formData, setFormData] = useState({
-    date: new Date().toISOString().split("T")[0],
-    startTime: "09:00",
-    endTime: "17:00",
-    breakMinutes: "30",
-  });
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async () => {
-    try {
-      await apiClient.post(`/time-entries/${id}/manual`, {
-        ...formData,
-        breakDuration: parseInt(formData.breakMinutes, 10) * 60, // convert to seconds
-      });
-
-      // Refresh entries
-      const res = await apiClient.get(`/time-entries/${id}`);
-      setTimeEntries(res.data.timeEntries);
-    } catch (error) {
-      console.error("Error submitting manual entry:", error);
-    }
-  };
 
   useEffect(() => {
     const getTimeEntries = async () => {
@@ -95,6 +71,7 @@ export default function TimeRecordsRoute() {
   return (
     <div className="p-6">
       <Heading3>Tracked Time</Heading3>
+      <CreateTimeEntryDialog onEntryCreated={setTimeEntries} />
       {timeEntries ? (
         <Table>
           <TableHeader>

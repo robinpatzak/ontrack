@@ -1,14 +1,5 @@
+import { FormDialog } from "@/components/FormDialog";
 import type { Project } from "@/components/sidebar/ProjectSection";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
@@ -17,14 +8,6 @@ import apiClient from "@/lib/api";
 import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 
-interface ProjectFormData {
-  title: string;
-  description: string;
-  workingHoursPerDay: number;
-  breakMinutesPerDay: number;
-  hourlyRate: number;
-}
-
 interface CreateProjectDialogProps {
   setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
 }
@@ -32,9 +15,7 @@ interface CreateProjectDialogProps {
 export default function CreateProjectDialog({
   setProjects,
 }: CreateProjectDialogProps) {
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [formData, setFormData] = useState<ProjectFormData>({
+  const [formData, setFormData] = useState({
     title: "",
     description: "",
     workingHoursPerDay: 8,
@@ -42,7 +23,12 @@ export default function CreateProjectDialog({
     hourlyRate: 20,
   });
 
-  const handleResetForm = () => {
+  const updateField = (field: keyof typeof formData, value: string | number) =>
+    setFormData((prev) => ({ ...prev, [field]: value }));
+
+  const handleSubmit = async () => {
+    const result = await apiClient.post("/project", formData);
+    setProjects((prev) => [...prev, result.data.project]);
     setFormData({
       title: "",
       description: "",
@@ -52,52 +38,24 @@ export default function CreateProjectDialog({
     });
   };
 
-  const handleInputChange = (
-    field: keyof ProjectFormData,
-    value: string | number
-  ) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
-  };
-
-  const handleCreateProject = async () => {
-    if (!formData.title.trim()) return;
-
-    setIsCreating(true);
-
-    try {
-      const result = await apiClient.post("/project", formData);
-      setProjects((prev) => [...prev, result.data.project]);
-      setIsDialogOpen(false);
-      handleResetForm();
-    } catch (error) {
-      console.error("Failed to create project:", error);
-    } finally {
-      setIsCreating(false);
-    }
-  };
-
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
+    <FormDialog
+      title="Create New Project"
+      description="Enter details for your new project."
+      trigger={
         <SidebarMenuButton tooltip="Create a project">
           <PlusCircleIcon />
           <span>Create Project</span>
         </SidebarMenuButton>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Create New Project</DialogTitle>
-          <DialogDescription>
-            Enter details for your new project.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
+      }
+      formFields={
+        <>
           <div className="grid gap-2">
             <Label htmlFor="title">Title</Label>
             <Input
               id="title"
               value={formData.title}
-              onChange={(e) => handleInputChange("title", e.target.value)}
+              onChange={(e) => updateField("title", e.target.value)}
               placeholder="Project Title"
             />
           </div>
@@ -105,9 +63,8 @@ export default function CreateProjectDialog({
             <Label htmlFor="description">Description</Label>
             <Textarea
               id="description"
-              rows={2}
               value={formData.description}
-              onChange={(e) => handleInputChange("description", e.target.value)}
+              onChange={(e) => updateField("description", e.target.value)}
               placeholder="Project Description"
             />
           </div>
@@ -116,11 +73,9 @@ export default function CreateProjectDialog({
             <Input
               id="workingHoursPerDay"
               type="number"
-              min={1}
-              max={24}
               value={formData.workingHoursPerDay}
               onChange={(e) =>
-                handleInputChange("workingHoursPerDay", Number(e.target.value))
+                updateField("workingHoursPerDay", Number(e.target.value))
               }
             />
           </div>
@@ -129,10 +84,9 @@ export default function CreateProjectDialog({
             <Input
               id="breakMinutesPerDay"
               type="number"
-              min={0}
               value={formData.breakMinutesPerDay}
               onChange={(e) =>
-                handleInputChange("breakMinutesPerDay", Number(e.target.value))
+                updateField("breakMinutesPerDay", Number(e.target.value))
               }
             />
           </div>
@@ -141,35 +95,18 @@ export default function CreateProjectDialog({
             <Input
               id="hourlyRate"
               type="number"
-              min={0}
               step={0.01}
               value={formData.hourlyRate}
               onChange={(e) =>
-                handleInputChange("hourlyRate", Number(e.target.value))
+                updateField("hourlyRate", Number(e.target.value))
               }
-              placeholder="0.00"
             />
           </div>
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => {
-              setIsDialogOpen(false);
-              handleResetForm();
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            onClick={handleCreateProject}
-            disabled={isCreating || !formData.title.trim()}
-          >
-            {isCreating ? "Creating ..." : "Create"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </>
+      }
+      onSubmit={handleSubmit}
+      submitLabel="Create"
+      disabled={!formData.title.trim()}
+    />
   );
 }

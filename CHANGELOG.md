@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added timeEntry routes to backend allowing to start, stop and retrieve working times
 - Added working integration of the time entries on a daily basis to the frontend
 - Added basic table displaying the time entries made so far
+- Added functionality to add time entries manually
 
 ### Changed
 
