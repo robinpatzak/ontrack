@@ -1,11 +1,9 @@
 import { Router } from "express";
 import { requireAuthentication } from "../middleware/authentication";
+import { meController } from "../controllers/user.controller";
 
 const userRoutes = Router();
 
-userRoutes.get("/me", requireAuthentication, (req, res) => {
-  // This is a placeholder for the user profile retrieval logic
-  res.json({ message: "User profile retrieved successfully" });
-});
+userRoutes.get("/me", requireAuthentication, meController);
 
 export default userRoutes;

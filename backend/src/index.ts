@@ -4,12 +4,15 @@ import express from "express";
 import connectDatabase from "./config/database";
 import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
 import authRoutes from "./routes/auth.route";
+import projectRoutes from "./routes/project.route";
+import timeEntryRoutes from "./routes/timeEntry.route";
 import userRoutes from "./routes/user.route";
 
 const app = express();
 
 connectDatabase();
 
+app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
@@ -27,6 +30,8 @@ router.get("/", (_, res) => {
 
 router.use("/auth", authRoutes);
 router.use("/user", userRoutes);
+router.use("/project", projectRoutes);
+router.use("/time-entries", timeEntryRoutes);
 
 app.use("/api/v0", router);
 

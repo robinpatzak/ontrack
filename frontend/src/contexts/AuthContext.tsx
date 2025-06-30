@@ -4,23 +4,33 @@ import { createContext, useContext, useEffect, useState } from "react";
 type AuthContextType = {
   isAuthenticated: boolean;
   loading: boolean;
+  user: { email: string; firstName: string; lastName: string } | null;
   checkAuth: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType>({
   isAuthenticated: false,
   loading: false,
+  user: null,
   checkAuth: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<{
+    email: string;
+    firstName: string;
+    lastName: string;
+  } | null>(null);
 
   const checkAuth = async () => {
     setLoading(true);
     try {
-      await apiClient.get("/user/me");
+      const response = await apiClient.get("/user/me");
+      if (response.data.success) {
+        setUser(response.data.user);
+      }
       setIsAuthenticated(true);
     } catch {
       setIsAuthenticated(false);
@@ -34,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, loading, checkAuth }}>
+    <AuthContext.Provider value={{ isAuthenticated, loading, user, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );

@@ -18,12 +18,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added cors middleware to backend
 - Configured axios in frontend
 - Added correct auth communication between frontend and backend
+- Setup dashboard page with basic sidebar content
+- Added endpoint for creating and retrieving projects from users
+- Implemented endpoints in frontend
+- Added routes and controller for projects in backend
+- Added the projects route to the frontend
+- Added refresh token logic to apiClient in frontend
+- Added functional breadcrumbs
+- Added default route that navigates to /dashboard
+- Added prototype timer component
+- Added modal when creating a project, which allows users to enter the details for their projects
+- Added reusable typography components
+- Added timeEntry routes to backend allowing to start, stop and retrieve working times
+- Added working integration of the time entries on a daily basis to the frontend
+- Added basic table displaying the time entries made so far
+- Added functionality to add time entries manually
+- Added table sorting and pagination
+- Added notice in the table if timer is still running
+- Added roadmap to the dashboard root
 
 ### Changed
 
 ### Removed
 
 ### Fixed
+- Fixed being able to open other accordions in the sidebar than the one from the current location
 
 ### Security
 

@@ -1,0 +1,23 @@
+{
+  "name": "ontrack",
+  "version": "0.0.0",
+  "description": "Webapplication that helps keep track of your working time",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently -k -n \"db,frontend,backend\" -c \"yellow,cyan,magenta\" \"docker compose up\" \"npm --prefix frontend run dev \" \"npm --prefix backend run dev\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/robinpatzak/ontrack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/robinpatzak/ontrack/issues"
+  },
+  "homepage": "https://github.com/robinpatzak/ontrack#readme",
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}
