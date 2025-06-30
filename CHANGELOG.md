@@ -35,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added functionality to add time entries manually
 - Added table sorting and pagination
 - Added notice in the table if timer is still running
+- Added roadmap to the dashboard root
 
 ### Changed
 
