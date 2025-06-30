@@ -33,6 +33,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added working integration of the time entries on a daily basis to the frontend
 - Added basic table displaying the time entries made so far
 - Added functionality to add time entries manually
+- Added table sorting and pagination
+- Added notice in the table if timer is still running
 
 ### Changed
 
