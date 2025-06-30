@@ -41,7 +41,17 @@ export const columns: ColumnDef<TimeRecord>[] = [
   {
     accessorKey: "endTime",
     header: "End",
-    cell: ({ row }) => formatHourMinute(row.original.endTime),
+    cell: ({ row }) => {
+      const { endTime, isWorkActive, isBreakActive, date } = row.original;
+      const isToday =
+        new Date(date).toDateString() === new Date().toDateString();
+
+      if ((isWorkActive || isBreakActive) && isToday) {
+        return <span className="text-red-600 font-medium">Running</span>;
+      }
+
+      return endTime ? formatHourMinute(endTime) : "-";
+    },
   },
   {
     accessorKey: "totalWorkTime",

@@ -352,6 +352,8 @@ export const getTimeEntries = async (req: Request, res: Response) => {
         endTime,
         totalWorkTime: entry.totalWorkTime,
         totalBreakTime: entry.totalBreakTime,
+        isWorkActive: entry.isWorkActive,
+        isBreakActive: entry.isBreakActive,
         currentWorkTime: entry.getCurrentWorkTime(),
         currentBreakTime: entry.getCurrentBreakTime(),
       };

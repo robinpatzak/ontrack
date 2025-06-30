@@ -10,6 +10,8 @@ export type TimeRecord = {
   date: string;
   startTime?: string;
   endTime?: string;
+  isWorkActive: boolean;
+  isBreakActive: boolean;
   totalWorkTime: number;
   totalBreakTime: number;
   currentWorkTime: number;
