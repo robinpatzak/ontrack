@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import apiClient from "@/lib/api";
+import type { AxiosError } from "axios";
 import { Trash } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
@@ -32,7 +33,6 @@ export default function Timer({
   const [isWorkRunning, setIsWorkRunning] = useState(false);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   const workIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const breakIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,13 +60,12 @@ export default function Timer({
         }
 
         lastSyncRef.current = Date.now();
-      } else {
-        setError(data.message || "Failed to fetch time entry");
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to fetch time entry"
-      );
+      const err = error as AxiosError;
+      if (err.response?.status !== 404) {
+        console.error("Error fetching the time entry:", error);
+      }
     } finally {
       setLoading(false);
     }
@@ -118,13 +117,9 @@ export default function Timer({
         clearAllTimers();
         startLocalWorkTimer();
         lastSyncRef.current = Date.now();
-      } else {
-        setError(data.message || "Failed to start work timer");
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to start work timer"
-      );
+      console.error("Error starting the work timer:", error);
     }
   };
 
@@ -145,13 +140,9 @@ export default function Timer({
         clearAllTimers();
         startLocalBreakTimer();
         lastSyncRef.current = Date.now();
-      } else {
-        setError(data.message || "Failed to start break timer");
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to start break timer"
-      );
+      console.error("Error starting the break timer:", error);
     }
   };
 
@@ -181,13 +172,9 @@ export default function Timer({
 
         clearAllTimers();
         lastSyncRef.current = Date.now();
-      } else {
-        setError(data.message || "Failed to stop timers");
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to stop timers"
-      );
+      console.error("Error stopping the timers:", error);
     }
   };
 
@@ -206,13 +193,9 @@ export default function Timer({
 
         clearAllTimers();
         lastSyncRef.current = Date.now();
-      } else {
-        setError(data.message || "Failed to reset today's entry");
       }
     } catch (error) {
-      setError(
-        error instanceof Error ? error.message : "Failed to reset today's entry"
-      );
+      console.error("Error resetting the timers:", error);
     }
   };
 
@@ -264,18 +247,6 @@ export default function Timer({
     return (
       <div className="flex justify-center items-center h-64">
         <div className="text-lg">Loading timer...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center text-red-500 p-4">
-        <div className="text-lg font-semibold">Error</div>
-        <div className="text-sm">{error}</div>
-        <Button onClick={fetchTimeEntry} className="mt-2" variant="outline">
-          Retry
-        </Button>
       </div>
     );
   }

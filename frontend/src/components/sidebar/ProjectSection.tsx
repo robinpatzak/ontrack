@@ -93,6 +93,10 @@ export default function ProjectSection() {
                         to: `/dashboard/${project._id}/timetracking`,
                       },
                       // TODO: add these routes
+                      {
+                        title: "Time Records",
+                        to: `/dashboard/${project._id}/timerecords`,
+                      },
                       // { title: "Timetable", to: "#" },
                       // { title: "Graph", to: "#" },
                       // { title: "Settings", to: "#" },

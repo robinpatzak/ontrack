@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  addTimeEntry,
   getTimeEntries,
   getTodayTimeEntry,
   resetTimers,
@@ -37,5 +38,10 @@ timeEntryRoutes.post(
   resetTimers
 );
 timeEntryRoutes.get("/:projectId", requireAuthentication, getTimeEntries);
+timeEntryRoutes.post(
+  "/:projectId/add-time-entry",
+  requireAuthentication,
+  addTimeEntry
+);
 
 export default timeEntryRoutes;

@@ -29,25 +29,19 @@ export const getTodayTimeEntry = async (req: Request, res: Response) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    let timeEntry = await TimeEntry.findOne({
+    const timeEntry = await TimeEntry.findOne({
       user: user._id,
       project: projectId,
       date: today,
     });
 
     if (!timeEntry) {
-      timeEntry = new TimeEntry({
-        user: user._id,
-        project: projectId,
-        date: today,
-        totalWorkTime: 0,
-        totalBreakTime: 0,
-        isWorkActive: false,
-        isBreakActive: false,
-        workSessions: [],
-        breakSessions: [],
+      res.status(404).json({
+        success: false,
+        message: "No time entry found for today",
+        timestamp: new Date().toISOString(),
       });
-      await timeEntry.save();
+      return;
     }
 
     res.status(200).json({
@@ -87,19 +81,24 @@ export const startWork = async (req: Request, res: Response) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const timeEntry = await TimeEntry.findOne({
+    let timeEntry = await TimeEntry.findOne({
       user: user._id,
       project: projectId,
       date: today,
     });
 
     if (!timeEntry) {
-      res.status(404).json({
-        success: false,
-        message: "Time entry not found",
-        timestamp: new Date().toISOString(),
+      timeEntry = new TimeEntry({
+        user: user._id,
+        project: projectId,
+        date: today,
+        totalWorkTime: 0,
+        totalBreakTime: 0,
+        isWorkActive: false,
+        isBreakActive: false,
+        workSessions: [],
+        breakSessions: [],
       });
-      return;
     }
 
     if (timeEntry.isBreakActive && timeEntry.breakStartedAt) {
@@ -341,11 +340,22 @@ export const getTimeEntries = async (req: Request, res: Response) => {
       )
       .sort({ date: -1 });
 
-    const entriesWithCurrentTimes = timeEntries.map((entry) => ({
-      ...entry.toObject(),
-      currentWorkTime: entry.getCurrentWorkTime(),
-      currentBreakTime: entry.getCurrentBreakTime(),
-    }));
+    const entriesWithCurrentTimes = timeEntries.map((entry) => {
+      const startTime = entry.workSessions?.[0]?.startTime;
+      const endTime = [...entry.workSessions]
+        .reverse()
+        .find((session) => session.endTime)?.endTime;
+
+      return {
+        ...entry.toObject(),
+        startTime,
+        endTime,
+        totalWorkTime: entry.totalWorkTime,
+        totalBreakTime: entry.totalBreakTime,
+        currentWorkTime: entry.getCurrentWorkTime(),
+        currentBreakTime: entry.getCurrentBreakTime(),
+      };
+    });
 
     res.status(200).json({
       success: true,
@@ -421,6 +431,76 @@ export const resetTimers = async (req: Request, res: Response) => {
       success: false,
       message: "Internal server error",
       timestamp: new Date().toISOString(),
+    });
+  }
+};
+
+export const addTimeEntry = async (req: Request, res: Response) => {
+  try {
+    const { projectId } = req.params;
+    const user = (req as any).user;
+
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "User not authenticated",
+      });
+      return;
+    }
+
+    const { date, startTime, endTime, breakDuration } = req.body;
+
+    //TODO: use Zod!
+    if (!date || !startTime || !endTime || breakDuration === null) {
+      res.status(400).json({
+        success: false,
+        message: "Missing required fields",
+      });
+      return;
+    }
+
+    const start = new Date(`${date}T${startTime}`);
+    const end = new Date(`${date}T${endTime}`);
+
+    //TODO: use Zod!
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid start or end time",
+      });
+      return;
+    }
+
+    const totalWorkTime =
+      Math.floor((end.getTime() - start.getTime()) / 1000) - breakDuration;
+
+    const timeEntry = new TimeEntry({
+      user: user._id,
+      project: projectId,
+      date: new Date(date),
+      totalWorkTime,
+      totalBreakTime: breakDuration,
+      workSessions: [
+        { startTime: start, endTime: end, duration: totalWorkTime },
+      ],
+      breakSessions:
+        breakDuration > 0
+          ? [{ startTime: start, duration: breakDuration }]
+          : [],
+    });
+
+    await timeEntry.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Time entry created",
+      timeEntry,
+    });
+  } catch (error) {
+    console.error("Error creating time entry:", error);
+    res.status(500).json({
+      success: false,
+      message: "Internal server error",
     });
   }
 };
