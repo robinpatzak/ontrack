@@ -138,7 +138,7 @@ export const logoutController = async (_: Request, res: Response) => {
       })
       .clearCookie("refreshToken", {
         httpOnly: true,
-        secure: NODE_ENV !== "devleopment",
+        secure: NODE_ENV !== "development",
         sameSite: "strict",
       })
       .status(200)
