@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
+import ms, { StringValue } from "ms";
+import { z } from "zod";
 import {
   JWT_ACCESS_EXPIRES_IN,
   JWT_REFRESH_EXPIRES_IN,
   NODE_ENV,
 } from "../config/env";
-import { loginUser, registerUser } from "../services/auth.service";
-import { z } from "zod";
-import ms, { StringValue } from "ms";
+import User from "../models/User";
 import { generateTokenPair, verifyRefreshToken } from "../utils/jwt";
 
 const registerSchema = z.object({
@@ -19,13 +19,24 @@ const registerSchema = z.object({
 export const registerController = async (req: Request, res: Response) => {
   try {
     const validatedBody = registerSchema.parse(req.body);
+    const { email, firstName, lastName, password } = validatedBody;
 
-    const { user } = await registerUser(validatedBody);
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      res.status(409).json({
+        success: false,
+        message: "User with this email already exists",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const user = await User.create({ email, firstName, lastName, password });
 
     res.status(201).json({
       success: true,
       message: "User registered successfully",
-      user,
+      user: user.omitPassword(),
       timestamp: new Date().toISOString(),
     });
   } catch (error) {
@@ -46,8 +57,32 @@ const loginSchema = z.object({
 export const loginController = async (req: Request, res: Response) => {
   try {
     const validatedBody = loginSchema.parse(req.body);
+    const { email, password } = validatedBody;
 
-    const { user, accessToken, refreshToken } = await loginUser(validatedBody);
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const isPasswordValid = await user.comparePassword(password);
+    if (!isPasswordValid) {
+      res.status(401).json({
+        success: false,
+        message: "Invalid email or password",
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
+    const { accessToken, refreshToken } = generateTokenPair({
+      userId: user._id,
+      email: user.email,
+    });
 
     res
       .cookie("accessToken", accessToken, {
@@ -66,7 +101,7 @@ export const loginController = async (req: Request, res: Response) => {
       .json({
         success: true,
         message: "User logged in successfully",
-        user,
+        user: user.omitPassword(),
       });
   } catch (error) {
     console.error("Error in loginController:", error);
@@ -81,6 +116,7 @@ export const loginController = async (req: Request, res: Response) => {
 export const refreshController = async (req: Request, res: Response) => {
   try {
     const refreshToken = req.cookies.refreshToken;
+
     if (!refreshToken) {
       res.status(401).json({
         success: false,
@@ -91,6 +127,7 @@ export const refreshController = async (req: Request, res: Response) => {
     }
 
     let payload;
+
     try {
       payload = verifyRefreshToken(refreshToken);
     } catch (error) {
