@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { requireAuthentication } from "../middleware/authentication";
 import {
   createProjectController,
   getProjectController,
@@ -8,8 +7,8 @@ import {
 
 const projectRoutes = Router();
 
-projectRoutes.post("/", requireAuthentication, createProjectController);
-projectRoutes.get("/", requireAuthentication, listProjectsController);
-projectRoutes.get("/:id", requireAuthentication, getProjectController);
+projectRoutes.post("/", createProjectController);
+projectRoutes.get("/", listProjectsController);
+projectRoutes.get("/:id", getProjectController);
 
 export default projectRoutes;

@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.route";
 import projectRoutes from "./routes/project.route";
 import timeEntryRoutes from "./routes/timeEntry.route";
 import userRoutes from "./routes/user.route";
+import { requireAuthentication } from "./middleware/authentication";
 
 const app = express();
 
@@ -29,9 +30,9 @@ router.get("/", (_, res) => {
 });
 
 router.use("/auth", authRoutes);
-router.use("/user", userRoutes);
-router.use("/project", projectRoutes);
-router.use("/time-entries", timeEntryRoutes);
+router.use("/user", requireAuthentication, userRoutes);
+router.use("/project", requireAuthentication, projectRoutes);
+router.use("/time-entries", requireAuthentication, timeEntryRoutes);
 
 app.use("/api/v0", router);
 
