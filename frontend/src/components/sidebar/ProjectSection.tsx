@@ -15,6 +15,13 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import apiClient from "@/lib/api";
+import { cn } from "@/lib/utils";
+import {
+  BarChart3Icon,
+  ClockIcon,
+  SettingsIcon,
+  TableIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
@@ -27,6 +34,14 @@ export interface Project {
   hourlyRate: number;
 }
 
+interface SubRoute {
+  title: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+  comingSoon?: boolean;
+}
+
 export default function ProjectSection() {
   const location = useLocation();
   const currentProjectId =
@@ -36,6 +51,35 @@ export default function ProjectSection() {
   const [openProjectId, setOpenProjectId] = useState<string | null>(
     currentProjectId
   );
+
+  const getSubRoutes = (projectId: string): SubRoute[] => [
+    {
+      title: "Time Tracking",
+      to: `/dashboard/${projectId}/timetracking`,
+      icon: ClockIcon,
+      disabled: false,
+    },
+    {
+      title: "Time Records",
+      to: `/dashboard/${projectId}/timerecords`,
+      icon: TableIcon,
+      disabled: false,
+    },
+    {
+      title: "Analytics",
+      to: `/dashboard/${projectId}/analytics`,
+      icon: BarChart3Icon,
+      disabled: true,
+      comingSoon: true,
+    },
+    {
+      title: "Settings",
+      to: `/dashboard/${projectId}/settings`,
+      icon: SettingsIcon,
+      disabled: true,
+      comingSoon: true,
+    },
+  ];
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -55,6 +99,10 @@ export default function ProjectSection() {
   useEffect(() => {
     setOpenProjectId(currentProjectId);
   }, [currentProjectId]);
+
+  const isRouteActive = (route: string) => {
+    return location.pathname === route;
+  };
 
   return (
     <>
@@ -87,26 +135,39 @@ export default function ProjectSection() {
                 </AccordionTrigger>
                 <AccordionContent className="pb-0">
                   <SidebarMenuSub>
-                    {[
-                      {
-                        title: "Timetracking",
-                        to: `/dashboard/${project._id}/timetracking`,
-                      },
-                      // TODO: add these routes
-                      {
-                        title: "Time Records",
-                        to: `/dashboard/${project._id}/timerecords`,
-                      },
-                      // { title: "Timetable", to: "#" },
-                      // { title: "Graph", to: "#" },
-                      // { title: "Settings", to: "#" },
-                    ].map((subItem) => (
+                    {getSubRoutes(project._id).map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
-                          <Link to={subItem.to}>
+                        {subItem.disabled ? (
+                          <div
+                            className={cn(
+                              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+                              "text-muted-foreground cursor-not-allowed opacity-50"
+                            )}
+                            title={
+                              subItem.comingSoon
+                                ? "Coming soon"
+                                : "Not available"
+                            }
+                          >
+                            <subItem.icon className="h-4 w-4" />
                             <span>{subItem.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
+                            {subItem.comingSoon && (
+                              <span className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded">
+                                Soon
+                              </span>
+                            )}
+                          </div>
+                        ) : (
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isRouteActive(subItem.to)}
+                          >
+                            <Link to={subItem.to}>
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        )}
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>
