@@ -1,4 +1,5 @@
 import AppSidebar from "@/components/sidebar/AppSidebar";
+import { ModeToggle } from "@/components/theme/ModeToggle";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -176,6 +177,7 @@ function DashboardLayoutInner() {
               </BreadcrumbList>
             </Breadcrumb>
           </div>
+          <ModeToggle />
         </header>
         <div className="flex flex-1 flex-col gap-4 p-4 pt-2">
           <Outlet />
