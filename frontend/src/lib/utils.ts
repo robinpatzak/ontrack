@@ -11,3 +11,19 @@ export const formatDateLocal = (date: Date) => {
   const day = String(date.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
+
+export const getAvatarUrl = (user: {
+  avatar?: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+}) => {
+  if (user.avatar) {
+    return user.avatar;
+  }
+
+  const fullName = `${user.firstName} ${user.lastName}`;
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(
+    fullName
+  )}&background=random`;
+};
