@@ -1,4 +1,4 @@
-import CreateProjectDialog from "@/components/sidebar/CreateProjectDialog";
+import CreateProjectDialog from "@/components/dialogs/CreateProjectDialog";
 import {
   Accordion,
   AccordionContent,
@@ -14,7 +14,15 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useSidebarContext } from "@/hooks/useSidebarContext";
 import apiClient from "@/lib/api";
+import { cn } from "@/lib/utils";
+import {
+  BarChart3Icon,
+  ClockIcon,
+  SettingsIcon,
+  TableIcon,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router";
 
@@ -27,7 +35,15 @@ export interface Project {
   hourlyRate: number;
 }
 
+interface SubRoute {
+  title: string;
+  to: string;
+  icon: React.ComponentType<{ className?: string }>;
+  disabled?: boolean;
+}
+
 export default function ProjectSection() {
+  const { closeSidebar } = useSidebarContext();
   const location = useLocation();
   const currentProjectId =
     location.pathname.match(/\/([a-f0-9]{24})/)?.[1] || null;
@@ -36,6 +52,33 @@ export default function ProjectSection() {
   const [openProjectId, setOpenProjectId] = useState<string | null>(
     currentProjectId
   );
+
+  const getSubRoutes = (projectId: string): SubRoute[] => [
+    {
+      title: "Time Tracking",
+      to: `/dashboard/${projectId}/timetracking`,
+      icon: ClockIcon,
+      disabled: false,
+    },
+    {
+      title: "Time Records",
+      to: `/dashboard/${projectId}/timerecords`,
+      icon: TableIcon,
+      disabled: false,
+    },
+    {
+      title: "Analytics",
+      to: `/dashboard/${projectId}/analytics`,
+      icon: BarChart3Icon,
+      disabled: true,
+    },
+    {
+      title: "Settings",
+      to: `/dashboard/${projectId}/settings`,
+      icon: SettingsIcon,
+      disabled: true,
+    },
+  ];
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -55,6 +98,10 @@ export default function ProjectSection() {
   useEffect(() => {
     setOpenProjectId(currentProjectId);
   }, [currentProjectId]);
+
+  const isRouteActive = (route: string) => {
+    return location.pathname === route;
+  };
 
   return (
     <>
@@ -80,33 +127,45 @@ export default function ProjectSection() {
                   <Link
                     to={`/dashboard/${project._id}`}
                     className="flex-1 text-left"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeSidebar();
+                    }}
                   >
                     <span>{project.title}</span>
                   </Link>
                 </AccordionTrigger>
                 <AccordionContent className="pb-0">
                   <SidebarMenuSub>
-                    {[
-                      {
-                        title: "Timetracking",
-                        to: `/dashboard/${project._id}/timetracking`,
-                      },
-                      // TODO: add these routes
-                      {
-                        title: "Time Records",
-                        to: `/dashboard/${project._id}/timerecords`,
-                      },
-                      // { title: "Timetable", to: "#" },
-                      // { title: "Graph", to: "#" },
-                      // { title: "Settings", to: "#" },
-                    ].map((subItem) => (
+                    {getSubRoutes(project._id).map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
-                          <Link to={subItem.to}>
+                        {subItem.disabled ? (
+                          <div
+                            className={cn(
+                              "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm",
+                              "text-muted-foreground cursor-not-allowed opacity-50"
+                            )}
+                          >
+                            <subItem.icon className="h-4 w-4" />
                             <span>{subItem.title}</span>
-                          </Link>
-                        </SidebarMenuSubButton>
+                          </div>
+                        ) : (
+                          <SidebarMenuSubButton
+                            asChild
+                            isActive={isRouteActive(subItem.to)}
+                          >
+                            <Link
+                              to={subItem.to}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                closeSidebar();
+                              }}
+                            >
+                              <subItem.icon className="h-4 w-4" />
+                              <span>{subItem.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        )}
                       </SidebarMenuSubItem>
                     ))}
                   </SidebarMenuSub>

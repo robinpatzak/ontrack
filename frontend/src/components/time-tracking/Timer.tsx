@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import apiClient from "@/lib/api";
 import type { AxiosError } from "axios";
-import { Trash } from "lucide-react";
+import { Clock, Coffee, Target, Trash } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 interface TimerProps {
@@ -21,6 +21,11 @@ interface TimeEntry {
   isBreakActive: boolean;
   workStartedAt?: string;
   breakStartedAt?: string;
+  workSessions?: Array<{
+    startTime: string;
+    endTime?: string;
+    duration?: number;
+  }>;
 }
 
 export default function Timer({
@@ -33,6 +38,7 @@ export default function Timer({
   const [isWorkRunning, setIsWorkRunning] = useState(false);
   const [isBreakRunning, setIsBreakRunning] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [timeEntry, setTimeEntry] = useState<TimeEntry | null>(null);
 
   const workIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const breakIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,15 +53,16 @@ export default function Timer({
       const data = response.data;
 
       if (data.success) {
-        const timeEntry: TimeEntry = data.timeEntry;
-        setWorkTime(timeEntry.currentWorkTime);
-        setBreakTime(timeEntry.currentBreakTime);
-        setIsWorkRunning(timeEntry.isWorkActive);
-        setIsBreakRunning(timeEntry.isBreakActive);
+        const entry: TimeEntry = data.timeEntry;
+        setTimeEntry(entry);
+        setWorkTime(entry.currentWorkTime);
+        setBreakTime(entry.currentBreakTime);
+        setIsWorkRunning(entry.isWorkActive);
+        setIsBreakRunning(entry.isBreakActive);
 
-        if (timeEntry.isWorkActive) {
+        if (entry.isWorkActive) {
           startLocalWorkTimer();
-        } else if (timeEntry.isBreakActive) {
+        } else if (entry.isBreakActive) {
           startLocalBreakTimer();
         }
 
@@ -108,9 +115,10 @@ export default function Timer({
       const data = response.data;
 
       if (data.success) {
-        const timeEntry: TimeEntry = data.timeEntry;
-        setWorkTime(timeEntry.currentWorkTime);
-        setBreakTime(timeEntry.currentBreakTime);
+        const entry: TimeEntry = data.timeEntry;
+        setTimeEntry(entry);
+        setWorkTime(entry.currentWorkTime);
+        setBreakTime(entry.currentBreakTime);
         setIsWorkRunning(true);
         setIsBreakRunning(false);
 
@@ -131,9 +139,10 @@ export default function Timer({
       const data = response.data;
 
       if (data.success) {
-        const timeEntry: TimeEntry = data.timeEntry;
-        setWorkTime(timeEntry.currentWorkTime);
-        setBreakTime(timeEntry.currentBreakTime);
+        const entry: TimeEntry = data.timeEntry;
+        setTimeEntry(entry);
+        setWorkTime(entry.currentWorkTime);
+        setBreakTime(entry.currentBreakTime);
         setIsWorkRunning(false);
         setIsBreakRunning(true);
 
@@ -164,9 +173,10 @@ export default function Timer({
       const data = response.data;
 
       if (data.success) {
-        const timeEntry: TimeEntry = data.timeEntry;
-        setWorkTime(timeEntry.currentWorkTime);
-        setBreakTime(timeEntry.currentBreakTime);
+        const entry: TimeEntry = data.timeEntry;
+        setTimeEntry(entry);
+        setWorkTime(entry.currentWorkTime);
+        setBreakTime(entry.currentBreakTime);
         setIsWorkRunning(false);
         setIsBreakRunning(false);
 
@@ -186,6 +196,7 @@ export default function Timer({
       const data = response.data;
 
       if (data.success) {
+        setTimeEntry(null);
         setWorkTime(0);
         setBreakTime(0);
         setIsWorkRunning(false);
@@ -226,6 +237,14 @@ export default function Timer({
     return `${h}:${m}:${s}`;
   };
 
+  const formatDisplayTime = (date: Date) => {
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  };
+
   const formatGoalTime = (seconds: number) => {
     if (seconds >= 3600) {
       return `${Math.floor(seconds / 3600)}h`;
@@ -240,8 +259,47 @@ export default function Timer({
     return "Start Work";
   };
 
+  const getStartTime = () => {
+    if (timeEntry?.workSessions && timeEntry.workSessions.length > 0) {
+      return new Date(timeEntry.workSessions[0].startTime);
+    }
+    return null;
+  };
+
+  const getRecommendedBreakTime = () => {
+    const startTime = getStartTime();
+    if (!startTime) return null;
+
+    const halfWorkGoal = totalWorkTimeGoal / 2;
+    const recommendedBreakTime = new Date(
+      startTime.getTime() + halfWorkGoal * 1000
+    );
+    return recommendedBreakTime;
+  };
+
+  const getEstimatedEndTime = () => {
+    const startTime = getStartTime();
+    if (!startTime) return null;
+
+    const remainingWorkTime = Math.max(totalWorkTimeGoal - workTime, 0);
+    const remainingBreakTime = Math.max(totalBreakTimeGoal - breakTime, 0);
+    const excessBreakTime = Math.max(breakTime - totalBreakTimeGoal, 0);
+
+    const totalRemainingTime =
+      remainingWorkTime + remainingBreakTime + excessBreakTime;
+    const estimatedEndTime = new Date(
+      startTime.getTime() + totalRemainingTime * 1000
+    );
+
+    return estimatedEndTime;
+  };
+
   const workRemainingTime = Math.max(totalWorkTimeGoal - workTime, 0);
   const breakRemainingTime = Math.max(totalBreakTimeGoal - breakTime, 0);
+
+  const startTime = getStartTime();
+  const recommendedBreakTime = getRecommendedBreakTime();
+  const estimatedEndTime = getEstimatedEndTime();
 
   if (loading) {
     return (
@@ -252,11 +310,13 @@ export default function Timer({
   }
 
   return (
-    <div className="space-y-4 w-full max-w-4xl mx-auto">
+    <div className="space-y-6 w-full max-w-4xl mx-auto">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card
           className={`border-2 ${
-            isWorkRunning ? "border-green-500 bg-green-50" : ""
+            isWorkRunning
+              ? "border-green-500 bg-green-50 dark:bg-green-950"
+              : ""
           }`}
         >
           <CardHeader className="text-center pb-2">
@@ -277,7 +337,7 @@ export default function Timer({
 
         <Card
           className={`border-2 ${
-            isBreakRunning ? "border-blue-500 bg-blue-50" : ""
+            isBreakRunning ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : ""
           }`}
         >
           <CardHeader className="text-center pb-2">
@@ -309,9 +369,54 @@ export default function Timer({
           Finish Work
         </Button>
       </div>
+
       <Button onClick={resetTimers} variant="destructive">
         <Trash /> Delete todays entry
       </Button>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border border-gray-200">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Clock className="h-8 w-8 text-blue-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Start Time</p>
+              <p className="text-lg font-semibold">
+                {startTime ? formatDisplayTime(startTime) : "--:--"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-gray-200">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Coffee className="h-8 w-8 text-orange-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">
+                Recommended Break
+              </p>
+              <p className="text-lg font-semibold">
+                {recommendedBreakTime
+                  ? formatDisplayTime(recommendedBreakTime)
+                  : "--:--"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border border-gray-200">
+          <CardContent className="flex items-center gap-3 p-4">
+            <Target className="h-8 w-8 text-green-600" />
+            <div>
+              <p className="text-sm font-medium text-gray-600">Estimated End</p>
+              <p className="text-lg font-semibold">
+                {estimatedEndTime
+                  ? formatDisplayTime(estimatedEndTime)
+                  : "--:--"}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

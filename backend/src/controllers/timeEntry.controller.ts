@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 import Project from "../models/Project";
 import TimeEntry from "../models/TimeEntry";
 
@@ -406,7 +407,6 @@ export const resetTimers = async (req: Request, res: Response) => {
       return;
     }
 
-    // Reset all values
     timeEntry.totalWorkTime = 0;
     timeEntry.totalBreakTime = 0;
     timeEntry.isWorkActive = false;
@@ -437,6 +437,32 @@ export const resetTimers = async (req: Request, res: Response) => {
   }
 };
 
+const addTimeEntrySchema = z
+  .object({
+    date: z.string().refine((date) => {
+      const parsed = new Date(date);
+      return !isNaN(parsed.getTime());
+    }, "Invalid date format"),
+    startTime: z
+      .string()
+      .regex(
+        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/,
+        "Invalid time format (HH:MM:SS)"
+      ),
+    endTime: z
+      .string()
+      .regex(
+        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/,
+        "Invalid time format (HH:MM:SS)"
+      ),
+    breakDuration: z.number().min(0, "Break duration must be non-negative"),
+  })
+  .refine((data) => {
+    const start = new Date(`${data.date}T${data.startTime}`);
+    const end = new Date(`${data.date}T${data.endTime}`);
+    return end > start;
+  }, "End time must be after start time");
+
 export const addTimeEntry = async (req: Request, res: Response) => {
   try {
     const { projectId } = req.params;
@@ -450,28 +476,11 @@ export const addTimeEntry = async (req: Request, res: Response) => {
       return;
     }
 
-    const { date, startTime, endTime, breakDuration } = req.body;
-
-    //TODO: use Zod!
-    if (!date || !startTime || !endTime || breakDuration === null) {
-      res.status(400).json({
-        success: false,
-        message: "Missing required fields",
-      });
-      return;
-    }
+    const validatedBody = addTimeEntrySchema.parse(req.body);
+    const { date, startTime, endTime, breakDuration } = validatedBody;
 
     const start = new Date(`${date}T${startTime}`);
     const end = new Date(`${date}T${endTime}`);
-
-    //TODO: use Zod!
-    if (isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-      res.status(400).json({
-        success: false,
-        message: "Invalid start or end time",
-      });
-      return;
-    }
 
     const totalWorkTime =
       Math.floor((end.getTime() - start.getTime()) / 1000) - breakDuration;

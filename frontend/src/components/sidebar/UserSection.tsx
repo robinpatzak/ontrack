@@ -8,8 +8,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/lib/api";
+import { getAvatarUrl } from "@/lib/utils";
 import { LogOutIcon, MoreVerticalIcon, SettingsIcon } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -26,7 +27,7 @@ export default function UserSection() {
   const userInitials = `${user.firstName.charAt(0)}${user.lastName.charAt(
     0
   )}`.toUpperCase();
-  const userAvatarImage = "//TODO:useravatarimage";
+  const userAvatarImage = getAvatarUrl(user);
 
   const handleLogout = async () => {
     await apiClient.get("/auth/logout");
@@ -40,7 +41,7 @@ export default function UserSection() {
           size="lg"
           className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
         >
-          <Avatar className="h-8 w-8 rounded-lg grayscale">
+          <Avatar className="h-8 w-8 rounded-lg">
             <AvatarImage src={userAvatarImage} alt={fullUserName} />
             <AvatarFallback className="rounded-lg">
               {userInitials}

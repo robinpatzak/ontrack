@@ -11,12 +11,15 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useSidebarContext } from "@/hooks/useSidebarContext";
 import { ArrowUpCircleIcon } from "lucide-react";
 import { Link } from "react-router";
 
 export default function AppSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
+  const { closeSidebar } = useSidebarContext();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -26,7 +29,7 @@ export default function AppSidebar({
               asChild
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
-              <Link to="/dashboard">
+              <Link to="/dashboard" onClick={closeSidebar}>
                 <ArrowUpCircleIcon className="h-5 w-5" />
                 <span className="text-base font-semibold">OnTrack</span>
               </Link>

@@ -1,15 +1,25 @@
 import { Request, Response } from "express";
 import Project from "../models/Project";
+import { z } from "zod";
+
+const createProjectSchema = z.object({
+  title: z.string(),
+  description: z.string().default(""),
+  workingHoursPerDay: z.number(),
+  breakMinutesPerDay: z.number(),
+  hourlyRate: z.number().optional(),
+});
 
 export const createProjectController = async (req: Request, res: Response) => {
   try {
+    const validatedBody = createProjectSchema.parse(req.body);
     const {
       title,
       description,
       workingHoursPerDay,
       breakMinutesPerDay,
       hourlyRate,
-    } = req.body;
+    } = validatedBody;
 
     const owner = (req as any).user._id;
 

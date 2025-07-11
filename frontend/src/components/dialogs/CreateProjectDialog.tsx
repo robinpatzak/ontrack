@@ -1,4 +1,4 @@
-import { FormDialog } from "@/components/FormDialog";
+import { FormDialog } from "@/components/dialogs/FormDialog";
 import type { Project } from "@/components/sidebar/ProjectSection";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
