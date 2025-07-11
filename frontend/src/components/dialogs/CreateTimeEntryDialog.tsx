@@ -14,10 +14,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { FormDialog } from "@/components/FormDialog";
+import { FormDialog } from "@/components/dialogs/FormDialog";
 
 import apiClient from "@/lib/api";
-import type { TimeRecord } from "@/routes/TimeRecordsRoute";
+import type { TimeRecord } from "@/pages/dashboard/TimeRecordsRoute";
 
 //TODO: move to helper file or similar
 const formatDateToIsoLocal = (date: Date) => {

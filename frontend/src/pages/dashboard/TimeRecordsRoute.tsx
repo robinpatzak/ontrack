@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import CreateTimeEntryDialog from "@/components/CreateTimeEntryDialog";
+import CreateTimeEntryDialog from "@/components/dialogs/CreateTimeEntryDialog";
 import { Heading3 } from "@/components/ui/typography";
 import apiClient from "@/lib/api";
 import { DataTable } from "@/components/ui/data-table";
-import { columns } from "@/components/TimeEntriesTable/columns";
+import { columns } from "@/components/time-tracking/time-entries-table/columns";
 
 export type TimeRecord = {
   date: string;

@@ -1,4 +1,4 @@
-import Timer from "@/components/Timer";
+import Timer from "@/components/time-tracking/Timer";
 import { Skeleton } from "@/components/ui/skeleton";
 import apiClient from "@/lib/api";
 import { useEffect, useState } from "react";

@@ -1,11 +1,11 @@
-import ProtectedRoute from "@/components/ProtectedRoute";
-import DashboardRoute from "@/routes/Dashboard";
-import DashboardLayout from "@/routes/DashboardLayout";
-import LoginRoute from "@/routes/Login";
-import ProjectRoute from "@/routes/Project";
-import RegisterRoute from "@/routes/Register";
-import TimeRecordsRoute from "@/routes/TimeRecordsRoute";
-import TimeTrackingRoute from "@/routes/TimeTrackingRoute";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import DashboardRoute from "@/pages/dashboard/Dashboard";
+import DashboardLayout from "@/pages/dashboard/DashboardLayout";
+import LoginRoute from "@/pages/auth/Login";
+import ProjectRoute from "@/pages/dashboard/Project";
+import RegisterRoute from "@/pages/auth/Register";
+import TimeRecordsRoute from "@/pages/dashboard/TimeRecordsRoute";
+import TimeTrackingRoute from "@/pages/dashboard/TimeTrackingRoute";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router";
 
 function App() {

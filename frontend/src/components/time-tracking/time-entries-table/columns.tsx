@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import type { TimeRecord } from "@/routes/TimeRecordsRoute";
+import type { TimeRecord } from "@/pages/dashboard/TimeRecordsRoute";
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)

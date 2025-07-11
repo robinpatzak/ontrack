@@ -1,4 +1,4 @@
-import CreateProjectDialog from "@/components/sidebar/CreateProjectDialog";
+import CreateProjectDialog from "@/components/dialogs/CreateProjectDialog";
 import {
   Accordion,
   AccordionContent,
