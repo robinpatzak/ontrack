@@ -2,8 +2,7 @@ import { PlusCircleIcon } from "lucide-react";
 import { useState } from "react";
 import { useParams } from "react-router";
 
-import { format } from "date-fns";
-
+import { FormDialog } from "@/components/dialogs/FormDialog";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
@@ -14,18 +13,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { FormDialog } from "@/components/dialogs/FormDialog";
 
 import apiClient from "@/lib/api";
 import type { TimeRecord } from "@/pages/dashboard/TimeRecordsRoute";
-
-//TODO: move to helper file or similar
-const formatDateToIsoLocal = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+import { formatDateLocal } from "@/lib/utils";
 
 interface CreateTimeEntryDialogProps {
   onEntryCreated: React.Dispatch<React.SetStateAction<TimeRecord[]>>;
@@ -56,7 +47,7 @@ export default function CreateTimeEntryDialog({
     if (!id || !date) return;
 
     await apiClient.post(`/time-entries/${id}/add-time-entry`, {
-      date: formatDateToIsoLocal(date),
+      date: formatDateLocal(date),
       startTime: formData.startTime,
       endTime: formData.endTime,
       breakDuration: parseInt(formData.breakMinutes, 10) * 60,
@@ -97,7 +88,7 @@ export default function CreateTimeEntryDialog({
                     id="date-picker"
                     className="w-full justify-between font-normal"
                   >
-                    {date ? format(date, "PPP") : "Select date"}
+                    {date ? formatDateLocal(date) : "Select date"}
                     <PlusCircleIcon className="ml-2 h-4 w-4" />
                   </Button>
                 </PopoverTrigger>
