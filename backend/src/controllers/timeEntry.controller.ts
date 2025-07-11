@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import { z } from "zod";
 import Project from "../models/Project";
 import TimeEntry from "../models/TimeEntry";
-import { z } from "zod";
 
 export const getTodayTimeEntry = async (req: Request, res: Response) => {
   try {
@@ -446,16 +446,16 @@ const addTimeEntrySchema = z
     startTime: z
       .string()
       .regex(
-        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format (HH:MM)"
+        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/,
+        "Invalid time format (HH:MM:SS)"
       ),
     endTime: z
       .string()
       .regex(
-        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/,
-        "Invalid time format (HH:MM)"
+        /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$/,
+        "Invalid time format (HH:MM:SS)"
       ),
-    breakDuration: z.number().min(0, "Break duration must be positive"),
+    breakDuration: z.number().min(0, "Break duration must be non-negative"),
   })
   .refine((data) => {
     const start = new Date(`${data.date}T${data.startTime}`);
