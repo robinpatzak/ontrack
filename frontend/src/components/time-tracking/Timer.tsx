@@ -314,7 +314,9 @@ export default function Timer({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card
           className={`border-2 ${
-            isWorkRunning ? "border-green-500 bg-green-50" : ""
+            isWorkRunning
+              ? "border-green-500 bg-green-50 dark:bg-green-950"
+              : ""
           }`}
         >
           <CardHeader className="text-center pb-2">
@@ -335,7 +337,7 @@ export default function Timer({
 
         <Card
           className={`border-2 ${
-            isBreakRunning ? "border-blue-500 bg-blue-50" : ""
+            isBreakRunning ? "border-blue-500 bg-blue-50 dark:bg-blue-950" : ""
           }`}
         >
           <CardHeader className="text-center pb-2">
