@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SidebarMenuButton } from "@/components/ui/sidebar";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/useAuth";
 import apiClient from "@/lib/api";
 import { getAvatarUrl } from "@/lib/utils";
 import { LogOutIcon, MoreVerticalIcon, SettingsIcon } from "lucide-react";

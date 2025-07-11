@@ -12,10 +12,17 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
+import { SidebarContext } from "@/contexts/SidebarContext";
 import apiClient from "@/lib/api";
-import React from "react";
-import { useCallback, useMemo, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Outlet, useLocation } from "react-router";
 
 interface BreadcrumbItem {
@@ -28,11 +35,38 @@ interface BreadcrumbItem {
 
 const MONGODB_ID_REGEX = /^[a-f0-9]{24}$/i;
 
-export default function DashboardLayout() {
+// Custom hook for mobile detection
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768); // md breakpoint
+    };
+
+    checkIsMobile();
+    window.addEventListener("resize", checkIsMobile);
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
+
+  return isMobile;
+};
+
+// Context to share mobile state and close function
+
+function DashboardLayoutInner() {
   const location = useLocation();
+  const { setOpenMobile } = useSidebar();
+  const isMobile = useIsMobile();
 
   const [projectNames, setProjectNames] = useState<Record<string, string>>({});
   const loadingProjectsRef = useRef<Set<string>>(new Set());
+
+  const closeSidebar = useCallback(() => {
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  }, [isMobile, setOpenMobile]);
 
   const fetchProjectName = useCallback(
     async (projectId: string) => {
@@ -105,7 +139,7 @@ export default function DashboardLayout() {
   }, [location.pathname, projectNames, fetchProjectName]);
 
   return (
-    <SidebarProvider>
+    <SidebarContext.Provider value={{ isMobile, closeSidebar }}>
       <AppSidebar variant="inset" />
       <SidebarInset>
         <header className="group-has-data-[collapsible=icon]/sidebar-wrapper:h-12 flex h-12 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear">
@@ -147,6 +181,14 @@ export default function DashboardLayout() {
           <Outlet />
         </div>
       </SidebarInset>
+    </SidebarContext.Provider>
+  );
+}
+
+export default function DashboardLayout() {
+  return (
+    <SidebarProvider>
+      <DashboardLayoutInner />
     </SidebarProvider>
   );
 }

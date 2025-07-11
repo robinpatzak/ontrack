@@ -14,6 +14,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
+import { useSidebarContext } from "@/hooks/useSidebarContext";
 import apiClient from "@/lib/api";
 import { cn } from "@/lib/utils";
 import {
@@ -42,6 +43,7 @@ interface SubRoute {
 }
 
 export default function ProjectSection() {
+  const { closeSidebar } = useSidebarContext();
   const location = useLocation();
   const currentProjectId =
     location.pathname.match(/\/([a-f0-9]{24})/)?.[1] || null;
@@ -125,7 +127,10 @@ export default function ProjectSection() {
                   <Link
                     to={`/dashboard/${project._id}`}
                     className="flex-1 text-left"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      closeSidebar();
+                    }}
                   >
                     <span>{project.title}</span>
                   </Link>
@@ -149,7 +154,13 @@ export default function ProjectSection() {
                             asChild
                             isActive={isRouteActive(subItem.to)}
                           >
-                            <Link to={subItem.to}>
+                            <Link
+                              to={subItem.to}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                closeSidebar();
+                              }}
+                            >
                               <subItem.icon className="h-4 w-4" />
                               <span>{subItem.title}</span>
                             </Link>
