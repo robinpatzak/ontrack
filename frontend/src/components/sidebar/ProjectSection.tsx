@@ -39,7 +39,6 @@ interface SubRoute {
   to: string;
   icon: React.ComponentType<{ className?: string }>;
   disabled?: boolean;
-  comingSoon?: boolean;
 }
 
 export default function ProjectSection() {
@@ -70,14 +69,12 @@ export default function ProjectSection() {
       to: `/dashboard/${projectId}/analytics`,
       icon: BarChart3Icon,
       disabled: true,
-      comingSoon: true,
     },
     {
       title: "Settings",
       to: `/dashboard/${projectId}/settings`,
       icon: SettingsIcon,
       disabled: true,
-      comingSoon: true,
     },
   ];
 
@@ -143,19 +140,9 @@ export default function ProjectSection() {
                               "flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-sm",
                               "text-muted-foreground cursor-not-allowed opacity-50"
                             )}
-                            title={
-                              subItem.comingSoon
-                                ? "Coming soon"
-                                : "Not available"
-                            }
                           >
                             <subItem.icon className="h-4 w-4" />
                             <span>{subItem.title}</span>
-                            {subItem.comingSoon && (
-                              <span className="ml-auto text-xs bg-muted px-1.5 py-0.5 rounded">
-                                Soon
-                              </span>
-                            )}
                           </div>
                         ) : (
                           <SidebarMenuSubButton
