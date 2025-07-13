@@ -14,5 +14,5 @@ const getEnvVariable = (key: string, defaultValue?: string): string => {
   return value;
 };
 
-export const API_BASE_URL = getEnvVariable("VITE_API_BASE_URL", "http://localhost");
-export const API_PORT = getEnvVariable("VITE_API_PORT", "8000");
+export const BACKEND_BASE_URL = getEnvVariable("VITE_BACKEND_BASE_URL", "http://localhost");
+export const BACKEND_PORT = getEnvVariable("VITE_BACKEND_PORT", "8000");

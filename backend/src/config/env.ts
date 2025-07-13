@@ -13,12 +13,16 @@ const getEnvVariable = (key: string, defaultValue?: string): string => {
 };
 
 export const NODE_ENV = getEnvVariable("NODE_ENV", "production");
-export const PORT = getEnvVariable("PORT", "8000");
+export const BACKEND_PORT = getEnvVariable("BACKEND_PORT", "8000");
 export const MONGODB_URI = getEnvVariable(
   "MONGODB_URI",
   "mongodb://localhost:27017/ontrack"
 );
-export const CLIENT_URL = getEnvVariable("CLIENT_URL", "http://localhost:5173");
+export const FRONTEND_BASE_URL = getEnvVariable(
+  "FRONTEND_BASE_URL",
+  "http://localhost"
+);
+export const FRONTEND_PORT = getEnvVariable("FRONTEND_PORT", "3000");
 
 export const JWT_ACCESS_SECRET = getEnvVariable("JWT_ACCESS_SECRET");
 export const JWT_ACCESS_EXPIRES_IN = getEnvVariable(

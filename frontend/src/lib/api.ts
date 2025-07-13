@@ -1,9 +1,9 @@
 import { API_VERSION } from "@/lib/constants";
-import { API_BASE_URL, API_PORT } from "@/lib/env";
+import { BACKEND_BASE_URL, BACKEND_PORT } from "@/lib/env";
 import axios from "axios";
 
 const apiClient = axios.create({
-  baseURL: `${API_BASE_URL}:${API_PORT}/api/${API_VERSION}`,
+  baseURL: `${BACKEND_BASE_URL}:${BACKEND_PORT}/api/${API_VERSION}`,
   headers: {
     "Content-Type": "application/json",
   },
