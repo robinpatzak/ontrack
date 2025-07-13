@@ -88,13 +88,13 @@ export const loginController = async (req: Request, res: Response) => {
       .cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: NODE_ENV !== "development",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: ms(JWT_ACCESS_EXPIRES_IN as StringValue),
       })
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: NODE_ENV !== "development",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: ms(JWT_REFRESH_EXPIRES_IN as StringValue),
       })
       .status(200)
@@ -146,7 +146,7 @@ export const refreshController = async (req: Request, res: Response) => {
       .cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: NODE_ENV !== "development",
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: ms(JWT_ACCESS_EXPIRES_IN as StringValue),
       })
       .status(200)
@@ -171,12 +171,12 @@ export const logoutController = async (_: Request, res: Response) => {
       .clearCookie("accessToken", {
         httpOnly: true,
         secure: NODE_ENV !== "development",
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .clearCookie("refreshToken", {
         httpOnly: true,
         secure: NODE_ENV !== "development",
-        sameSite: "strict",
+        sameSite: "lax",
       })
       .status(200)
       .json({
