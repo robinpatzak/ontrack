@@ -7,5 +7,16 @@ services:
     volumes:
       - ontrack-db-data:/data/db
 
+  ontrack-backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGODB_URI=mongodb://ontrack-db:27017/ontrack
+      - JWT_ACCESS_SECRET=e8aRP#WfNen11*fUGqE!tbEWQckpkvBZ
+      - JWT_REFRESH_SECRET=9ehsKABsYkPx&TE!P#vdu%5mcY4wZpqw
+    depends_on:
+      - ontrack-db
+
 volumes:
   ontrack-db-data:

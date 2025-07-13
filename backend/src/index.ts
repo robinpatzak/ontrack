@@ -1,13 +1,14 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import { API_VERSION } from "./config/constants";
 import connectDatabase from "./config/database";
-import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
+import { CLIENT_URL, PORT } from "./config/env";
+import { requireAuthentication } from "./middleware/authentication";
 import authRoutes from "./routes/auth.route";
 import projectRoutes from "./routes/project.route";
 import timeEntryRoutes from "./routes/timeEntry.route";
 import userRoutes from "./routes/user.route";
-import { requireAuthentication } from "./middleware/authentication";
 
 const app = express();
 
