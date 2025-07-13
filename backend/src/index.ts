@@ -15,7 +15,6 @@ const app = express();
 connectDatabase();
 
 app.use(cors({ origin: CLIENT_URL, credentials: true }));
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 app.use(express.json());
 

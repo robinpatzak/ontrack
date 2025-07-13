@@ -1,4 +1,5 @@
-import { API_BASE_URL, API_PORT, API_VERSION } from "@/lib/env";
+import { API_VERSION } from "@/lib/constants";
+import { API_BASE_URL, API_PORT } from "@/lib/env";
 import axios from "axios";
 
 const apiClient = axios.create({

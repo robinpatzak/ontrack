@@ -13,10 +13,22 @@ services:
       - "8000:8000"
     environment:
       - MONGODB_URI=mongodb://ontrack-db:27017/ontrack
+      - CLIENT_URL=http://localhost:3000
       - JWT_ACCESS_SECRET=e8aRP#WfNen11*fUGqE!tbEWQckpkvBZ
       - JWT_REFRESH_SECRET=9ehsKABsYkPx&TE!P#vdu%5mcY4wZpqw
     depends_on:
       - ontrack-db
+
+  ontrack-frontend:
+    build:
+      context: ./frontend
+      args:
+        - VITE_API_BASE_URL=http://localhost
+        - VITE_API_PORT=8000
+    ports:
+      - "3000:80"
+    depends_on:
+      - ontrack-backend
 
 volumes:
   ontrack-db-data:
