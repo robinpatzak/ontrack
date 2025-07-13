@@ -30,7 +30,6 @@ services:
       context: ./frontend
       args:
         - VITE_BACKEND_BASE_URL=${BACKEND_BASE_URL}
-        - VITE_BACKEND_PORT=${BACKEND_PORT}
     container_name: ontrack_frontend
     ports:
       - "127.0.0.1:${FRONTEND_PORT}:80"
