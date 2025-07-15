@@ -1,20 +1,22 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import { API_VERSION } from "./config/constants";
 import connectDatabase from "./config/database";
-import { API_VERSION, CLIENT_URL, PORT } from "./config/env";
+import { BACKEND_PORT, FRONTEND_PORT, FRONTEND_BASE_URL } from "./config/env";
+import { requireAuthentication } from "./middleware/authentication";
 import authRoutes from "./routes/auth.route";
 import projectRoutes from "./routes/project.route";
 import timeEntryRoutes from "./routes/timeEntry.route";
 import userRoutes from "./routes/user.route";
-import { requireAuthentication } from "./middleware/authentication";
 
 const app = express();
 
 connectDatabase();
 
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
-app.use(cors({ origin: CLIENT_URL, credentials: true }));
+app.use(
+  cors({ origin: `${FRONTEND_BASE_URL}:${FRONTEND_PORT}`, credentials: true })
+);
 app.use(cookieParser());
 app.use(express.json());
 
@@ -34,8 +36,10 @@ router.use("/user", requireAuthentication, userRoutes);
 router.use("/project", requireAuthentication, projectRoutes);
 router.use("/time-entries", requireAuthentication, timeEntryRoutes);
 
-app.use("/api/v0", router);
+app.use(`/api/${API_VERSION}`, router);
 
-app.listen(8000, () => {
-  console.info(`API is running on http://localhost:${PORT}/api/${API_VERSION}`);
+app.listen(parseInt(BACKEND_PORT, 10), "0.0.0.0", () => {
+  console.info(
+    `API is running on http://0.0.0.0:${BACKEND_PORT}/api/${API_VERSION}`
+  );
 });

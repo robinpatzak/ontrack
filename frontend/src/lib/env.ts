@@ -1,11 +1,11 @@
-const getEnvVariable = (key: string): string => {
+const getEnvVariable = (key: string, defaultValue?: string): string => {
   if (!key.startsWith("VITE_")) {
     console.warn(
       `Environment variable ${key} does not start with "VITE_". This may not be accessible in the frontend.`
     );
   }
 
-  const value = import.meta.env[key];
+  const value = import.meta.env[key] || defaultValue;
 
   if (!value) {
     throw new Error(`Environment variable missing: ${key}`);
@@ -14,6 +14,7 @@ const getEnvVariable = (key: string): string => {
   return value;
 };
 
-export const API_BASE_URL = getEnvVariable("VITE_API_BASE_URL");
-export const API_PORT = getEnvVariable("VITE_API_PORT");
-export const API_VERSION = getEnvVariable("VITE_API_VERSION");
+export const BACKEND_BASE_URL = getEnvVariable(
+  "VITE_BACKEND_BASE_URL",
+  "http://localhost"
+);
