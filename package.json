@@ -4,7 +4,7 @@
   "description": "Webapplication that helps keep track of your working time",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently -k -n \"db,frontend,backend\" -c \"yellow,cyan,magenta\" \"docker compose up\" \"npm --prefix frontend run dev \" \"npm --prefix backend run dev\""
+    "dev": "concurrently -k -n \"frontend,backend\" -c \"yellow,magenta\" \"npm --prefix frontend run dev \" \"npm --prefix backend run dev\""
   },
   "repository": {
     "type": "git",
