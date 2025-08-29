@@ -16,7 +16,7 @@ export const NODE_ENV = getEnvVariable("NODE_ENV", "production");
 export const BACKEND_PORT = getEnvVariable("BACKEND_PORT", "8000");
 export const MONGODB_URI = getEnvVariable(
   "MONGODB_URI",
-  "mongodb://localhost:27017/ontrack"
+  "mongodb://ontrack_db:27017/ontrack"
 );
 export const FRONTEND_BASE_URL = getEnvVariable(
   "FRONTEND_BASE_URL",

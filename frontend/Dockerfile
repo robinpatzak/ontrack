@@ -1,22 +1,17 @@
-FROM node:22-alpine AS build
+FROM node:22-alpine
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
-COPY package*.json ./
-RUN npm ci
+COPY package.json .
+
+RUN npm install
+
+RUN npm i -g serve
+
 COPY . .
-
-ARG VITE_BACKEND_BASE_URL=http://localhost
-ENV VITE_BACKEND_BASE_URL=${VITE_BACKEND_BASE_URL}
 
 RUN npm run build
 
-FROM nginx:alpine
+EXPOSE 3000
 
-COPY --from=build /usr/src/app/dist /usr/share/nginx/html
-
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist"]

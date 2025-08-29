@@ -1,1 +1,1 @@
-export const API_VERSION = "v0";
+export const API_VERSION = "v1";
