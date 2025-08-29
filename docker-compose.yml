@@ -6,6 +6,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
+    environment:
+      - VITE_BACKEND_BASE_URL=http://localhost
 
   ontrack_backend:
     container_name: ontrack_backend
