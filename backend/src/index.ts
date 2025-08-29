@@ -1,9 +1,8 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
-import { API_VERSION } from "./config/constants";
 import connectDatabase from "./config/database";
-import { BACKEND_PORT, FRONTEND_PORT, FRONTEND_BASE_URL } from "./config/env";
+import { BACKEND_PORT, FRONTEND_BASE_URL, FRONTEND_PORT } from "./config/env";
 import { requireAuthentication } from "./middleware/authentication";
 import authRoutes from "./routes/auth.route";
 import projectRoutes from "./routes/project.route";
@@ -36,10 +35,10 @@ router.use("/user", requireAuthentication, userRoutes);
 router.use("/project", requireAuthentication, projectRoutes);
 router.use("/time-entries", requireAuthentication, timeEntryRoutes);
 
-app.use(`/api/${API_VERSION}`, router);
+app.use("/api/v1", router);
 
 app.listen(parseInt(BACKEND_PORT, 10), "0.0.0.0", () => {
   console.info(
-    `API is running on http://0.0.0.0:${BACKEND_PORT}/api/${API_VERSION}`
+    `API is running on http://0.0.0.0:${BACKEND_PORT}/api`
   );
 });
