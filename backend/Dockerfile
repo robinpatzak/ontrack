@@ -1,6 +1,6 @@
 FROM node:22-alpine AS build
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
@@ -12,13 +12,13 @@ RUN npm run build
 
 FROM node:22-alpine AS production
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 
 RUN npm ci --only=production
 
-COPY --from=build /usr/src/app/dist ./dist
+COPY --from=build /app/dist ./dist
 
 RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
 

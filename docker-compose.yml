@@ -1,40 +1,33 @@
 services:
-  ontrack_db:
-    image: mongo:latest
-    container_name: ontrack_db
+  ontrack_frontend:
+    container_name: ontrack_frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
     ports:
-      - "127.0.0.1:${MONGODB_PORT}:27017"
-    environment:
-      - MONGO_INITDB_DATABASE=ontrack
-    volumes:
-      - ontrack_db_data:/data/db
+      - 3000:3000
 
   ontrack_backend:
-    build: ./backend
     container_name: ontrack_backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
     ports:
-      - "127.0.0.1:${BACKEND_PORT}:8000"
+      - 8000:8000
     environment:
-      - NODE_ENV=${NODE_ENV}
-      - MONGODB_URI=${MONGODB_URI}
-      - PORT=8000
-      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
-      - FRONTEND_PORT=${FRONTEND_PORT}
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - JWT_ACCESS_SECRET=my-super-secret
+      - JWT_REFRESH_SECRET=my-super-refresh-secret
     depends_on:
       - ontrack_db
 
-  ontrack_frontend:
-    build:
-      context: ./frontend
-      args:
-        - VITE_BACKEND_BASE_URL=${BACKEND_BASE_URL}
-    container_name: ontrack_frontend
+  ontrack_db:
+    container_name: ontrack_db
+    image: mongo:6.0.26
+    volumes:
+      - ontrack_db_data:/data/db
     ports:
-      - "127.0.0.1:${FRONTEND_PORT}:80"
-    depends_on:
-      - ontrack_backend
+      - 27017:27017
+    restart: always
 
 volumes:
   ontrack_db_data:
