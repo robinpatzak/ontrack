@@ -6,6 +6,8 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
+    env_file:
+      - ./frontend/.env.production
 
   ontrack_backend:
     container_name: ontrack_backend
@@ -16,6 +18,8 @@ services:
       - 8000:8000
     depends_on:
       - ontrack_db
+    env_file:
+      - ./backend/.env.production
 
   ontrack_db:
     container_name: ontrack_db
