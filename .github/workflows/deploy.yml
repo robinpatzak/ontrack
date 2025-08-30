@@ -37,7 +37,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd /home/robinpatzak/ontrack
-            sudo docker compose build ontrack_frontend ontrack_backend
-            sudo docker compose pull ontrack_db
-            sudo docker compose up -d
-            sudo docker image prune -f
+            docker compose build ontrack_frontend ontrack_backend
+            docker compose pull ontrack_db
+            docker compose up -d
+            docker image prune -f
