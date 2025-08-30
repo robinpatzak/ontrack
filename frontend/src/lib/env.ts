@@ -14,7 +14,4 @@ const getEnvVariable = (key: string, defaultValue?: string): string => {
   return value;
 };
 
-export const BACKEND_BASE_URL = getEnvVariable(
-  "VITE_BACKEND_BASE_URL",
-  "http://localhost"
-);
+export const BACKEND_BASE_URL = getEnvVariable("VITE_BACKEND_BASE_URL", "/api");
