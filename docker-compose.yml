@@ -6,8 +6,6 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 3000:3000
-    environment:
-      - VITE_BACKEND_BASE_URL=/api
 
   ontrack_backend:
     container_name: ontrack_backend
@@ -16,9 +14,6 @@ services:
       dockerfile: ./Dockerfile
     ports:
       - 8000:8000
-    environment:
-      - JWT_ACCESS_SECRET=my-super-secret
-      - JWT_REFRESH_SECRET=my-super-refresh-secret
     depends_on:
       - ontrack_db
 
