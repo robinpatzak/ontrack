@@ -38,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added roadmap to the dashboard root
 - Added stat boxes for start time, recommended break time and estimated end time in timer component
 - Added theme toggle for light, dark and system
+- Added automatic deployment to production when the main branch get updates
 
 ### Changed
 
