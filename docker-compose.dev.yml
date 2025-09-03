@@ -1,0 +1,35 @@
+services:
+  ontrack_frontend:
+    container_name: ontrack_frontend
+    build:
+      context: ./frontend
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    environment:
+      - VITE_BACKEND_BASE_URL=http://ontrack_backend:8000/api
+
+  ontrack_backend:
+    container_name: ontrack_backend
+    build:
+      context: ./backend
+      dockerfile: ./Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+      - ontrack_db
+    environment:
+      - JWT_ACCESS_SECRET=your_jwt_access_secret
+      - JWT_REFRESH_SECRET=your_jwt_refresh_secret
+
+  ontrack_db:
+    container_name: ontrack_db
+    image: mongo:8.0.13
+    volumes:
+      - ontrack_db_data:/data/db
+    ports:
+      - 27017:27017
+    restart: always
+
+volumes:
+  ontrack_db_data:
